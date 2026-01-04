@@ -40,9 +40,9 @@ public class sampleauton extends LinearOpMode {
 
 
         TrajectorySequence test = drive.trajectorySequenceBuilder(startPose)
-                .strafeTo(new Vector2d(0, -36))
+                .strafeTo(new Vector2d(-36, -36))
                 .waitSeconds(1)
-                .strafeTo(new Vector2d(72, -36))
+                .strafeTo(new Vector2d(-55, -36))
                 .build();
 
 

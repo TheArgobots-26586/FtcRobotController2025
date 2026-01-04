@@ -119,10 +119,10 @@ public class SampleMecanumDrive extends MecanumDrive {
         // but we reset to ensure we start at 0
        // odo.resetPosAndIMU();
 
-        leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
-        leftRear = hardwareMap.get(DcMotorEx.class, "leftBack");
-        rightRear = hardwareMap.get(DcMotorEx.class, "rightBack");
-        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
+        leftFront = hardwareMap.get(DcMotorEx.class, "LeftFront");
+        leftRear = hardwareMap.get(DcMotorEx.class, "LeftBack");
+        rightRear = hardwareMap.get(DcMotorEx.class, "RightBack");
+        rightFront = hardwareMap.get(DcMotorEx.class, "RightFront");
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
 

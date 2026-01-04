@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.PoseStorage;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
-@Autonomous(name = "AllDecodeAuton", group = "Robot")
+@Autonomous(name = "simpleAuton", group = "Robot")
 public class simpleAuton extends LinearOpMode {
 
 
@@ -42,6 +42,7 @@ public class simpleAuton extends LinearOpMode {
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         kicker = hardwareMap.get(Servo.class, "kicker");
         bootkicker = hardwareMap.get(DcMotor.class, "bootkicker");
+
         // -------------------- Drive Init --------------------
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -125,12 +126,12 @@ public class simpleAuton extends LinearOpMode {
 
         // -------------------- Select Trajectory --------------------
         if (position == "BlueBack") {
-            switch (detectedTag) {
-                case 21:
+           // switch (detectedTag) {
+                //case 21:
                     drive.followTrajectorySequence(traj21BlueBack);
-                    break;
+                  //  break;
 
-            }
+          //  }
         }
 
         telemetry.addData("Auton Finished", runtime.toString());
