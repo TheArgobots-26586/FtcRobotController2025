@@ -28,8 +28,8 @@ public class PinpointLocalizer implements Localizer {
 
         // Set directions based on your mounting
         odo.setEncoderDirections(
-                GoBildaPinpointDriver.EncoderDirection.FORWARD,
-                GoBildaPinpointDriver.EncoderDirection.FORWARD
+                GoBildaPinpointDriver.EncoderDirection.REVERSED,
+                GoBildaPinpointDriver.EncoderDirection.REVERSED
         );
 
         odo.resetPosAndIMU();

@@ -24,7 +24,7 @@ public class DecodeTestFinal1b extends LinearOpMode {
     private RevColorSensorV3 distanceSensor;
     private IMU imu;
 
-    private static final double VELO_CLOSE = 700;
+    private static final double VELO_CLOSE = -700;
 
     enum RobotState {
         IDLE,
@@ -158,7 +158,7 @@ public class DecodeTestFinal1b extends LinearOpMode {
                     break;
 
                 case SHOOT:
-                    intake.setPower(-1);
+                    intake.setPower(-0.9);
                     bootkicker.setPower(-0.4);
 
 
