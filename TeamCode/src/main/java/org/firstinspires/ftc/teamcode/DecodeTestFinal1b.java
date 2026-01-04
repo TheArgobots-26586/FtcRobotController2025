@@ -62,7 +62,7 @@ public class DecodeTestFinal1b extends LinearOpMode {
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
 
-        kicker.setPosition(0.33);
+        kicker.setPosition(0.25);
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -144,17 +144,17 @@ public class DecodeTestFinal1b extends LinearOpMode {
                     shooter.setVelocity(VELO_CLOSE);
                     intake.setPower(-0.9);
                     bootkicker.setPower(-0.4);
-                    kicker.setPosition(0.33);
+                    kicker.setPosition(0.25);
                     break;
 
                 case COLLECT:
                     firingEnabled = false;
                     //shooter.setVelocity(VELO_CLOSE);
-                    kicker.setPosition(0.33);
+                    kicker.setPosition(0.25);
                     bootkicker.setPower(-0.4);
                     intake.setPower(-1);
                    // armservo.setPosition(0.67);
-                    armservo.setPosition(0.17);
+                    armservo.setPosition(0.1375);
                     break;
 
                 case SHOOT:
@@ -172,15 +172,15 @@ public class DecodeTestFinal1b extends LinearOpMode {
 
                     // auto-fire while balls exist
                     if (distanceCM < 7) {
-                        kicker.setPosition(0.8);
+                        kicker.setPosition(0.6);
                         sleep(600);
-                        kicker.setPosition(0.33);
+                        kicker.setPosition(0.25);
                     }
 
                     // stop when no ball
                     if (distanceCM >= 7) {
                        // firingEnabled = false;
-                        kicker.setPosition(0.33);
+                        kicker.setPosition(0.25);
                     }
                     break;
             }
