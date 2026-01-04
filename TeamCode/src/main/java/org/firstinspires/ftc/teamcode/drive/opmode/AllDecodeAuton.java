@@ -213,8 +213,8 @@ public class AllDecodeAuton extends LinearOpMode {
                 .addTemporalMarker(() -> shooter.setVelocity(1000))
                 .waitSeconds(1)
 
-                //start position -12,60
-                .back(100)
+                //start position -48,48
+                .back(70)
                 .addTemporalMarker(() -> kicker.setPosition(0.8))
                 .waitSeconds(0.25)
                 .addTemporalMarker(() -> kicker.setPosition(0.33))
@@ -231,14 +231,14 @@ public class AllDecodeAuton extends LinearOpMode {
                         new Pose2d(-36, -36, Math.toRadians(90)),
                         Math.toRadians(90)
                 )
-                .strafeTo(new Vector2d(-48, -36))
+                .strafeTo(new Vector2d(-55, -36))
                 //         .addTemporalMarker(() -> {
                 //             intake.setPower(0);
                 //         })
-                .splineToLinearHeading(new Pose2d(-12, -36, Math.toRadians(0)), Math.toRadians(0))
-                .splineToLinearHeading(new Pose2d(-12, 12, Math.toRadians(0)), Math.toRadians(0))
+                .lineToLinearHeading(new Pose2d(-12, -36, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(-12, 12, Math.toRadians(0)))
                 .addTemporalMarker(() -> {
-                    rotator.setPosition(0.67);//change as needed
+                    rotator.setPosition(0.67);  //change as needed
                 })
                 .addTemporalMarker(() -> kicker.setPosition(0.8))
                 .waitSeconds(0.25)
@@ -256,8 +256,8 @@ public class AllDecodeAuton extends LinearOpMode {
         TrajectorySequence traj22BlueFront = drive.trajectorySequenceBuilder(startPose)
                 .addTemporalMarker(() -> shooter.setVelocity(1000))
                 .waitSeconds(1)
-
-                // start position: (-12, 60)
+                .back(70)
+                // start position: (-48,48)
                 .addTemporalMarker(() -> kicker.setPosition(0.8))
                 .waitSeconds(0.25)
                 .addTemporalMarker(() -> kicker.setPosition(0.33))
@@ -271,7 +271,7 @@ public class AllDecodeAuton extends LinearOpMode {
                 .addTemporalMarker(() -> kicker.setPosition(0.33))
 
                 .splineToLinearHeading(
-                        new Pose2d(-36, -12, Math.toRadians(90)),
+                        new Pose2d(-36, -12, Math.toRadians(90)),  // change to move back
                         Math.toRadians(90)
                 )
                 .strafeTo(new Vector2d(-48, -12))
