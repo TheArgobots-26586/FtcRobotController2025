@@ -51,7 +51,7 @@ public class simpleAuton extends LinearOpMode {
         //blue back: (-12,-60)
         //red back: (12, -60)
         //blue front: (-48, 48,45)
-        //red front: (48, 48, 315)
+      //  //red front: (48, 48, 315)
         drive.setPoseEstimate(startPose);
 
         //  Limelight Init
