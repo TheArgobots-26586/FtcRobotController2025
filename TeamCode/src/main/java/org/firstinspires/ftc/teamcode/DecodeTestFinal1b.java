@@ -62,7 +62,7 @@ public class DecodeTestFinal1b extends LinearOpMode {
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
 
-        kicker.setPosition(0.33);
+        kicker.setPosition(0.25);
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
