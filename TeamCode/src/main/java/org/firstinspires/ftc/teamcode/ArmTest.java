@@ -17,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class ArmTest extends LinearOpMode {
 
     private Servo armservo;
+    private DcMotor intake;
 
 
 
@@ -24,6 +25,7 @@ public class ArmTest extends LinearOpMode {
     public void runOpMode() {
 
         armservo = hardwareMap.get(Servo.class, "armservo");
+        intake = hardwareMap.get(DcMotor.class, "intake");
 
 
         // --- Initialize intake/shooter ---
@@ -43,25 +45,29 @@ public class ArmTest extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-
-
-
-
             if (gamepad1.dpad_down) {
-                armservo.setPosition(0.1);//lower pos
+                armservo.setPosition(0.125);//lower pos
             }
             if (gamepad1.dpad_right) {
-                armservo.setPosition(0.05);
+                armservo.setPosition(0.15);
+            }
+            if (gamepad1.b) {
+                armservo.setPosition(0.13);
             }
             if (gamepad1.dpad_left) {
-                armservo.setPosition(0);
+                armservo.setPosition(0.135);
             }
             if (gamepad1.dpad_up) {
-                armservo.setPosition(0.2);//higher pos
+                armservo.setPosition(0.1375);//higher pos
             }
+            if (gamepad1.a) {
+                intake.setPower(-0.9);
+            }
+
 
 
             telemetry.addData("armservo Pos", armservo.getPosition());
+            telemetry.addData("intake Pow", intake.getPower());
            // telemetry.addData("armservo Pos", armservo.get());
 
 

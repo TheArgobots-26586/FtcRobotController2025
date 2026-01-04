@@ -176,14 +176,14 @@ public class DecodeTestFinal3 extends LinearOpMode {
 //                    }
                     // auto-fire while balls exist
                     if (distanceCM < 7) {
-                        kicker.setPosition(0.8);
+                        kicker.setPosition(0.6);
                         sleep(600);
-                        kicker.setPosition(0.33);
+                        kicker.setPosition(0.25);
                     }
                     // stop when no ball
                     if (distanceCM >= 7) {
                         // firingEnabled = false;
-                        kicker.setPosition(0.33);
+                        kicker.setPosition(0.25);
                     }
                     break;
 
@@ -203,9 +203,9 @@ public class DecodeTestFinal3 extends LinearOpMode {
 
                     // auto-fire while balls exist
                     if (distanceCM < 7) {
-                        kicker.setPosition(0.8);
+                        kicker.setPosition(0.6);
                         sleep(600);
-                        kicker.setPosition(0.33);
+                        kicker.setPosition(0.25);
                     }
 
                     // stop when no ball

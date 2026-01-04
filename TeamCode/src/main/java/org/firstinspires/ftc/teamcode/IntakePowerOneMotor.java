@@ -10,36 +10,20 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
-@TeleOp(name="IntakePowerOneMotor", group="Robot")
+@TeleOp(name="IntakePowerOneMotorWithArm", group="Robot")
 public class IntakePowerOneMotor extends LinearOpMode {
 
     private DcMotor intake;
     private Servo armservo;
 
-
-
     @Override
     public void runOpMode() {
 
         intake = hardwareMap.get(DcMotor.class, "intake");
-        armservo = hardwareMap.get(Servo.class, "arm");
-
-
-        // --- Initialize intake/shooter ---
-
-
-        // --- Initialize Limelight / rotator ---
-
-
-        //  rotator.setPosition(0.3);
-
-        // --- Initialize IMU ---
-
-
+        armservo = hardwareMap.get(Servo.class, "armservo");
 
         waitForStart();
         //distance sensor
@@ -47,35 +31,38 @@ public class IntakePowerOneMotor extends LinearOpMode {
         while (opModeIsActive()) {
 
 
-
-            if (gamepad1.x) {
-                intake.setPower(-1);
+            if (gamepad1.a) {
+                intake.setPower(-0.5);
             }
 
             if (gamepad1.x) {
-                intake.setPower(-0.9);
+                intake.setPower(0.5);
             }
-            if (gamepad1.x) {
-                intake.setPower(-0.8);
-            }
-            if (gamepad1.x) {
-                intake.setPower(-1);
-            }
+
+
             if (gamepad1.dpad_down) {
-                armservo.setPosition(0.5);
+                armservo.setPosition(0.1);
+            }
+            if (gamepad1.dpad_up) {
+                armservo.setPosition(0.2);
+            }
+            if (gamepad1.dpad_right) {
+                armservo.setPosition(0.7);
+            }
+            if (gamepad1.dpad_left) {
+                armservo.setPosition(0.9);
             }
 
 
-
-            telemetry.addData("armservo Pos", intake.getPower());
+        }
+            telemetry.addData("armservo Pos", armservo.getPosition());
+            telemetry.addData("intake Power", intake.getPower());
             // telemetry.addData("armservo Pos", armservo.get());
-
-
             telemetry.update();
         }
 
     }
-}
+
 
 
 
