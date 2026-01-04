@@ -24,13 +24,15 @@ public class PowerOneIntakeWithMove extends LinearOpMode {
     public DcMotor bootkicker;
     // public Servo rotator;
     RevColorSensorV3 distanceSensor;
-    private static final double VELO_CLOSE = 700;//1530
-    private static final double VELO_FAR = 900;//1660
+    private static final double VELO_CLOSE = -700;//1530
+    private static final double VELO_FAR = -900;//1660
     private DcMotor leftFrontDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor leftBackDrive = null;
     private DcMotor rightBackDrive = null;
     private final int ROBOT_OR_FIELD_CENTRIC = 1;
+    boolean lastOptions = false;
+
 
 
     @Override
@@ -88,8 +90,14 @@ public class PowerOneIntakeWithMove extends LinearOpMode {
 
         waitForStart();
         //distance sensor
-
+        imu.resetYaw();
         while (opModeIsActive()) {
+            boolean options = gamepad1.options;
+
+            if (options && !lastOptions) {
+                imu.resetYaw();
+            }
+            lastOptions = options;
             double distanceCM = distanceSensor.getDistance(DistanceUnit.CM);
             // --- Drivetrain field-centric ---
             double y = -gamepad1.left_stick_y / 1.5;
@@ -157,11 +165,9 @@ public class PowerOneIntakeWithMove extends LinearOpMode {
                 intake.setPower(-0.9);
             }
             if (gamepad2.dpad_left) {
-                armservo.setPosition(0.67);//lower position
+                armservo.setPosition(0.1375);//lower position
             }
-            if (gamepad2.dpad_right) {
-                armservo.setPosition(0.7);//higher position
-            }
+
             telemetry.addData("Rotator Power", intake.getPower());
             telemetry.addData("armservo Pos", armservo.getPosition());
             telemetry.addData("Distance", distanceCM);

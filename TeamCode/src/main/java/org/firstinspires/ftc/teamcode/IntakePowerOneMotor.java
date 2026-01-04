@@ -19,16 +19,21 @@ public class IntakePowerOneMotor extends LinearOpMode {
     private DcMotor intake;
     private Servo armservo;
 
+
+
     @Override
     public void runOpMode() {
 
         intake = hardwareMap.get(DcMotor.class, "intake");
         armservo = hardwareMap.get(Servo.class, "armservo");
 
+
+
         waitForStart();
         //distance sensor
 
         while (opModeIsActive()) {
+
 
 
             if (gamepad1.a) {
@@ -39,6 +44,7 @@ public class IntakePowerOneMotor extends LinearOpMode {
                 intake.setPower(0.5);
             }
 
+            }
 
             if (gamepad1.dpad_down) {
                 armservo.setPosition(0.1);
@@ -54,7 +60,7 @@ public class IntakePowerOneMotor extends LinearOpMode {
             }
 
 
-        }
+
             telemetry.addData("armservo Pos", armservo.getPosition());
             telemetry.addData("intake Power", intake.getPower());
             // telemetry.addData("armservo Pos", armservo.get());
