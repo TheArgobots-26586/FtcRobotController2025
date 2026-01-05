@@ -19,6 +19,7 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -126,6 +127,9 @@ public class SampleMecanumDrive extends MecanumDrive {
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
 
+        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
+
         for (DcMotorEx motor : motors) {
             MotorConfigurationType motorConfigurationType = motor.getMotorType().clone();
             motorConfigurationType.setAchieveableMaxRPMFraction(1.0);
@@ -150,8 +154,6 @@ public class SampleMecanumDrive extends MecanumDrive {
         // TODO: if desired, use setLocalizer() to change the localization method
         // Inside SampleMecanumDrive constructor
         setLocalizer(new PinpointLocalizer(hardwareMap));
-
-
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(
                 follower, HEADING_PID, batteryVoltageSensor,
@@ -309,6 +311,7 @@ public class SampleMecanumDrive extends MecanumDrive {
         leftRear.setPower(v1);
         rightRear.setPower(v2);
         rightFront.setPower(v3);
+    //    leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     @Override
@@ -321,6 +324,7 @@ public class SampleMecanumDrive extends MecanumDrive {
     public Double getExternalHeadingVelocity() {
         //return (double) imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate;
         return odo.getHeadingVelocity(AngleUnit.RADIANS.getUnnormalized());
+        //return  (double) odo.getRobotAngular
     }
 
     public static TrajectoryVelocityConstraint getVelocityConstraint(double maxVel, double maxAngularVel, double trackWidth) {

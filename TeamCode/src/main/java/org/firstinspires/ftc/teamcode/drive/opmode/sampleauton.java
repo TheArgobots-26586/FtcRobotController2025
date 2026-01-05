@@ -1,62 +1,64 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.PoseStorage;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 @Autonomous(name = "sampleauton", group = "Robot")
 public class sampleauton extends LinearOpMode {
 
-    // Limelight
-
-
     private ElapsedTime runtime = new ElapsedTime();
-     // BlueBack, BlueFront, RedBack, RedFront
 
     @Override
     public void runOpMode() {
-
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
-        Pose2d startPose = new Pose2d(-12, -60, 0);
+        Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));
         drive.setPoseEstimate(startPose);
-
-        //  Limelight Init
-
-
 
 
         TrajectorySequence test = drive.trajectorySequenceBuilder(startPose)
-                .strafeTo(new Vector2d(-36, -36))
+                .forward(50)
+
                 .waitSeconds(1)
-                .strafeTo(new Vector2d(-55, -36))
+                .strafeLeft(30)
                 .build();
 
+        while (!isStarted() && !isStopRequested()) {
+//            telemetry.addData("Status", "Initialized");
+//            telemetry.addData("Start Pose", startPose.toString());
+            telemetry.update();
+        }
 
+        waitForStart();
+        if (isStopRequested()) return;
 
         runtime.reset();
-        waitForStart();
 
-        if (isStopRequested()) return;
 
         drive.followTrajectorySequence(test);
 
+        Pose2d finalPose = drive.getPoseEstimate();
+        PoseStorage.currentPose = finalPose;
 
-
-        telemetry.addData("Auton Finished", runtime.toString());
-        telemetry.update();
+        while (opModeIsActive() && !isStopRequested()) {
+           // displayTelemetry(drive);
+//            telemetry.addData("Status", "Path Finished");
+//            telemetry.addData("Runtime", runtime.toString());
+            telemetry.update();
+        }
     }
+
+//    private void displayTelemetry(SampleMecanumDrive drive) {
+//        Pose2d currentPose = drive.getPoseEstimate();
+//        telemetry.addData("Current X", String.format("%.2f", currentPose.getX()));
+//        telemetry.addData("Current Y", String.format("%.2f", currentPose.getY()));
+//        telemetry.addData("Heading (Deg)", String.format("%.2f", Math.toDegrees(currentPose.getHeading())));
+//    }
 }
