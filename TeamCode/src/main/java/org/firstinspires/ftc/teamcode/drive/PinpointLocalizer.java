@@ -24,12 +24,13 @@ public class PinpointLocalizer implements Localizer {
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
 
         // TODO: Replace with YOUR measured offsets (mm)
-        odo.setOffsets(-111, -127, DistanceUnit.MM);
+        //odo.setOffsets(-111, -127, DistanceUnit.MM);
+        odo.setOffsets(-86.36, -121.9, DistanceUnit.MM);
 
         // Set directions based on your mounting
         odo.setEncoderDirections(
                 GoBildaPinpointDriver.EncoderDirection.REVERSED,
-                GoBildaPinpointDriver.EncoderDirection.REVERSED
+                GoBildaPinpointDriver.EncoderDirection.FORWARD
         );
 
         odo.resetPosAndIMU();

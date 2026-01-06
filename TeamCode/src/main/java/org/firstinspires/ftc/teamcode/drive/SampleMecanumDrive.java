@@ -60,10 +60,10 @@ import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kV;
  */
 @Config
 public class SampleMecanumDrive extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(0.25, 0, 0);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(0.75, 0, 0);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(8.1, 0.5, 0);//0.75
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(0.25, 0, 0);//0.25
 
-    public static double LATERAL_MULTIPLIER = 1.38;
+    public static double LATERAL_MULTIPLIER = 1.04;
 
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
@@ -225,6 +225,7 @@ public class SampleMecanumDrive extends MecanumDrive {
         DriveSignal signal = trajectorySequenceRunner.update(getPoseEstimate(), getPoseVelocity());
         if (signal != null) setDriveSignal(signal);
     }
+
 
     public void waitForIdle() {
         while (!Thread.currentThread().isInterrupted() && isBusy())
