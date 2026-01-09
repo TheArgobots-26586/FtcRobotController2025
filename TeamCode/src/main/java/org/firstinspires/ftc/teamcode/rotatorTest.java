@@ -15,51 +15,30 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @TeleOp(name="rotatorTest", group="Robot")
 public class rotatorTest extends LinearOpMode {
-
     private Servo rotator;
-
-
-
 
     @Override
     public void runOpMode() {
 
         rotator = hardwareMap.get(Servo.class, "rotator");
-       // intake = hardwareMap.get(DcMotor.class, "intake");
-
-
-        // --- Initialize intake/shooter ---
-
-
-        // --- Initialize Limelight / rotator ---
-
-
-        //  rotator.setPosition(0.3);
-
-        // --- Initialize IMU ---
-
-
-
         waitForStart();
-        //distance sensor
 
         while (opModeIsActive()) {
 
-            if (gamepad1.dpad_down) {
+            if (gamepad1.dpad_left) {
                 rotator.setPosition(0.5);//lower pos
             }
             if (gamepad1.dpad_right) {
                 rotator.setPosition(0.15);
             }
+            if (gamepad1.dpad_down) {
+                rotator.setPosition(0);
+            }
+            if(gamepad1.dpad_up) {
+                rotator.setPosition(1.0);
+            }
 
-
-
-
-            telemetry.addData("armservo Pos", rotator.getPosition());
-
-            // telemetry.addData("armservo Pos", armservo.get());
-
-
+            telemetry.addData("rotator Pos", rotator.getPosition());
             telemetry.update();
         }
 

@@ -24,7 +24,8 @@ public class DecodeTestFinal1b extends LinearOpMode {
     private RevColorSensorV3 distanceSensor;
     private IMU imu;
 
-    private static final double VELO_CLOSE = -700;
+    //private static final double VELO_CLOSE = -1200; // 1200 from 53-65 inches  - camera to april tag
+    private static final double VELO_CLOSE = -1100; // 1100 from less than 33in from april tag will fail. Works from 63-33in
 
     enum RobotState {
         IDLE,
@@ -136,14 +137,15 @@ public class DecodeTestFinal1b extends LinearOpMode {
             boolean pressed = gamepad2.dpad_right && !lastDpadRight;
             lastDpadRight = gamepad2.dpad_right;//dpadright to
 
+            armservo.setPosition(0.1375);
             // STATE MACHINE
             switch (currentState) {
 
                 case IDLE:
                     firingEnabled = false;
                     shooter.setVelocity(VELO_CLOSE);
-                    intake.setPower(-0.9);
-                    bootkicker.setPower(-0.4);
+                    intake.setPower(-0.1);
+                    bootkicker.setPower(-0.1);
                     kicker.setPosition(0.25);
                     break;
 
@@ -153,13 +155,14 @@ public class DecodeTestFinal1b extends LinearOpMode {
                     kicker.setPosition(0.25);
                     bootkicker.setPower(-0.4);
                     intake.setPower(-1);
+                    //armservo.setPosition(0.1375);
                    // armservo.setPosition(0.67);
-                    armservo.setPosition(0.1375);
+
                     break;
 
                 case SHOOT:
-                    intake.setPower(-0.9);
-                    bootkicker.setPower(-0.4);
+                    intake.setPower(-0.2);
+                    bootkicker.setPower(-0.2);
 
 
                     shooter.setVelocity(VELO_CLOSE);
@@ -201,6 +204,7 @@ public class DecodeTestFinal1b extends LinearOpMode {
             telemetry.addData("Firing Enabled", firingEnabled);
             telemetry.addData("Current State is:", currentState);
             telemetry.addData("Motor Power:", shooter.getVelocity());
+            telemetry.addData("Intake Power:", intake.getPower());
             telemetry.update();
         }
     }
