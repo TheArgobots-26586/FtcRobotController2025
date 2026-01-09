@@ -88,4 +88,15 @@ public class PinpointLocalizer implements Localizer {
     public void setPoseVelocity(@Nullable Pose2d poseVelocity) {
         // RoadRunner 0.5.x requirement - safe to leave empty
     }
+
+    public double getHeading() {
+        return odo.getHeading(AngleUnit.RADIANS);
+    }
+    public void resetHeading() {
+        odo.setHeading(0, AngleUnit.RADIANS);
+    }
+
+    public void reset() {
+        odo.resetPosAndIMU();
+    }
 }

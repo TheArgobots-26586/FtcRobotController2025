@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -7,11 +8,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 
 @TeleOp(name="DecodeTestFinal1b", group="Robot")
 public class DecodeTestFinal1b extends LinearOpMode {
@@ -22,7 +23,7 @@ public class DecodeTestFinal1b extends LinearOpMode {
     private Servo kicker;
     private DcMotor bootkicker;
     private RevColorSensorV3 distanceSensor;
-    private IMU imu;
+    private PinpointLocalizer pinpointLocalizer;
 
     //private static final double VELO_CLOSE = -1200; // 1200 from 53-65 inches  - camera to april tag
     private static final double VELO_CLOSE = -1100; // 1100 from less than 33in from april tag will fail. Works from 63-33in
@@ -46,7 +47,6 @@ public class DecodeTestFinal1b extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-
         distanceSensor = hardwareMap.get(RevColorSensorV3.class, "sensor_color_distance");
 
         leftFront  = hardwareMap.get(DcMotor.class, "LeftFront");
@@ -67,28 +67,21 @@ public class DecodeTestFinal1b extends LinearOpMode {
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        pinpointLocalizer = new PinpointLocalizer(hardwareMap);
 
-        imu = hardwareMap.get(IMU.class, "imu");
-        imu.initialize(new IMU.Parameters(
-                new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
-                        RevHubOrientationOnRobot.UsbFacingDirection.UP
-                )
-        ));
-        double headingOffset = 0;
-        if (PoseStorage.localizer != null){
-            headingOffset = PoseStorage.localizer.getPoseEstimate().getHeading();
-        }
+        // You can change this to using the pinpoint computer. That will eliminate the need for
+        // PoseStorage. At the start of teleop we can directly get the pose from the pinpoint computer.
+        // Pinpoint computer is also more accurate.
+
+
         waitForStart();
-
-        imu.resetYaw();
 
 
         while (opModeIsActive()) {
+            pinpointLocalizer.update();
             boolean options = gamepad1.options;
-
             if (options && !lastOptions) {
-                imu.resetYaw();
+                pinpointLocalizer.resetHeading();
             }
             lastOptions = options;
 
@@ -122,9 +115,9 @@ public class DecodeTestFinal1b extends LinearOpMode {
             double x  =  gamepad1.left_stick_x / 1.5;
             double rx =  gamepad1.right_stick_x / 1.5;
 
-            double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-            double rotX = x * Math.cos(-heading - headingOffset) - y * Math.sin(-heading - headingOffset);
-            double rotY = x * Math.sin(-heading - headingOffset) + y * Math.cos(-heading - headingOffset);
+            double heading = pinpointLocalizer.getHeading();
+            double rotX = x * Math.cos(-heading) - y * Math.sin(-heading);
+            double rotY = x * Math.sin(-heading) + y * Math.cos(-heading);
 
             double denom = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
             leftFront.setPower((rotY + rotX + rx) / denom);
@@ -205,6 +198,9 @@ public class DecodeTestFinal1b extends LinearOpMode {
             telemetry.addData("Current State is:", currentState);
             telemetry.addData("Motor Power:", shooter.getVelocity());
             telemetry.addData("Intake Power:", intake.getPower());
+            telemetry.addData("x:", pinpointLocalizer.getPoseEstimate().getX());
+            telemetry.addData("y:", pinpointLocalizer.getPoseEstimate().getY());
+            telemetry.addData("heading:", pinpointLocalizer.getHeading());
             telemetry.update();
         }
     }
