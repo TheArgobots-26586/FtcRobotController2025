@@ -14,14 +14,17 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 public class PinpointLocalizer implements Localizer {
 
+    int num_setpos_calls =0;
     private final GoBildaPinpointDriver odo;
-    private Pose2d poseEstimate = new Pose2d(0, 0, 0);
+    public static int num_instances = 0;
+    private Pose2d poseEstimate = new Pose2d(0, 0, 0);//chance x and y back to 0,0
 
     public PinpointLocalizer(HardwareMap hardwareMap) {
         odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
 
         // Set your pod type
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        num_instances ++;
 
         // TODO: Replace with YOUR measured offsets (mm)
         //odo.setOffsets(-111, -127, DistanceUnit.MM);
@@ -59,6 +62,7 @@ public class PinpointLocalizer implements Localizer {
     @Override
     public void setPoseEstimate(@NonNull Pose2d pose) {
         poseEstimate = pose;
+        num_setpos_calls++;
 
         // Pinpoint requires its own Pose2D format to reset internal tracking
         odo.setPosition(new Pose2D(
@@ -86,7 +90,7 @@ public class PinpointLocalizer implements Localizer {
 
 
     public void setPoseVelocity(@Nullable Pose2d poseVelocity) {
-        // RoadRunner 0.5.x requirement - safe to leave empty
+
     }
 
     public double getHeading() {
@@ -96,7 +100,7 @@ public class PinpointLocalizer implements Localizer {
         odo.setHeading(0, AngleUnit.RADIANS);
     }
 
-    public void reset() {
-        odo.resetPosAndIMU();
-    }
+    public void reset() { odo.resetPosAndIMU();}
+
+    public int getNumSetPosCalls() { return num_setpos_calls;}
 }

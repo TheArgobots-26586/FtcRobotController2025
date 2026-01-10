@@ -55,6 +55,7 @@ import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kA;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kStatic;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kV;
 
+
 /*
  * Simple mecanum drive hardware implementation for REV hardware.
  */
@@ -86,6 +87,8 @@ public class SampleMecanumDrive extends MecanumDrive {
     private List<Integer> lastEncVels = new ArrayList<>();
     private GoBildaPinpointDriver odo;
 
+    private static PinpointLocalizer ppl;
+
     public SampleMecanumDrive(HardwareMap hardwareMap) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
@@ -99,26 +102,6 @@ public class SampleMecanumDrive extends MecanumDrive {
         for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
-
-        // TODO: adjust the names of the following hardware devices to match your configuration
-//        imu = hardwareMap.get(IMU.class, "imu");
-//        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-//                DriveConstants.LOGO_FACING_DIR, DriveConstants.USB_FACING_DIR));
-//        imu.initialize(parameters);
-        // --- PINPOINT IMU & ODOMETRY INITIALIZATION ---
-        odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
-
-        // Calibration Settings
-    //    odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        //old values before pinpoint
-       // odo.setOffsets(-127.0, -76.2, DistanceUnit.MM);
-        //these are the new values
-        //odo.setOffsets(-111.0, -127.2, DistanceUnit.MM);
-       // odo.setOffsets(-127.0, -76.2, DistanceUnit.MM); // Using your previous offsets
-
-        // Since you are "sticker-side up", no orientation change needed
-        // but we reset to ensure we start at 0
-       // odo.resetPosAndIMU();
 
         leftFront = hardwareMap.get(DcMotorEx.class, "LeftFront");
         leftRear = hardwareMap.get(DcMotorEx.class, "LeftBack");
@@ -153,7 +136,10 @@ public class SampleMecanumDrive extends MecanumDrive {
 
         // TODO: if desired, use setLocalizer() to change the localization method
         // Inside SampleMecanumDrive constructor
-        setLocalizer(new PinpointLocalizer(hardwareMap));
+
+        ppl = new PinpointLocalizer((hardwareMap));
+        setLocalizer(ppl);
+
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(
                 follower, HEADING_PID, batteryVoltageSensor,
@@ -162,6 +148,7 @@ public class SampleMecanumDrive extends MecanumDrive {
     }
 
     public TrajectoryBuilder trajectoryBuilder(Pose2d startPose) {
+
         return new TrajectoryBuilder(startPose, VEL_CONSTRAINT, ACCEL_CONSTRAINT);
     }
 
@@ -317,7 +304,7 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     @Override
     public double getRawExternalHeading() {
-      //  return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+      //  return imu.getRobotYawPitchRollAngle s().getYaw(AngleUnit.RADIANS);
         return odo.getPosition().getHeading(AngleUnit.RADIANS);
     }
 
@@ -338,6 +325,16 @@ public class SampleMecanumDrive extends MecanumDrive {
     public static TrajectoryAccelerationConstraint getAccelerationConstraint(double maxAccel) {
         return new ProfileAccelerationConstraint(maxAccel);
     }
+
+    // newly added - resets the pinpoint position and heading
+    public void resetPinPoint(Pose2d pose) {
+        odo.resetPosAndIMU();
+        setPoseEstimate(pose);
+    }
+
+    public int getNumSetPosCalls() { return ppl.getNumSetPosCalls(); }
+
+
 }
 
 

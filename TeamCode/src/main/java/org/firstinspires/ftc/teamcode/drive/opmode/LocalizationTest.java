@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 /**
@@ -20,25 +23,46 @@ public class LocalizationTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
-        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        Pose2d startPose;
+        startPose = new Pose2d(10, 10, 0);
 
         waitForStart();
+        drive.setPoseEstimate(startPose);
+        drive.update();
+        Pose2d poseEstimate ;
+
+        Trajectory traj21BlueFront = drive.trajectoryBuilder(drive.getPoseEstimate())
+                .back(20)
+                .build();
+
+        if (isStopRequested()) return;
+        drive.update();
+        drive.followTrajectory(traj21BlueFront);
+        telemetry.addData("Pose Resets", drive.getNumSetPosCalls());
+        telemetry.addData("numinstances", PinpointLocalizer.num_instances);
+        telemetry.update();
+
+        //drive.resetPinPoint(startPose);
 
         while (!isStopRequested()) {
-            drive.setWeightedDrivePower(
+
+            /*drive.setWeightedDrivePower(
                     new Pose2d(
                             -gamepad1.left_stick_y,
                             -gamepad1.left_stick_x,
                             -gamepad1.right_stick_x
                     )
             );
-
+             */
             drive.update();
 
-            Pose2d poseEstimate = drive.getPoseEstimate();
+           poseEstimate = drive.getPoseEstimate();
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
+
             telemetry.update();
         }
     }

@@ -27,7 +27,7 @@ public class PinpointSanityTest extends LinearOpMode {
 
 
         pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED,
-                GoBildaPinpointDriver.EncoderDirection.REVERSED);
+                GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
 
         pinpoint.resetPosAndIMU();

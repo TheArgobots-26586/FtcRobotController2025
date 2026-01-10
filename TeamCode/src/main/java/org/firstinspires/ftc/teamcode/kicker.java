@@ -51,7 +51,7 @@ public class kicker extends LinearOpMode {
             }
 
             if (gamepad1.dpad_down) {
-                kicker.setPosition(0.3);
+                kicker.setPosition(0.33);
             }
             if (gamepad1.dpad_right) {
                 kicker.setPosition(0.25);
