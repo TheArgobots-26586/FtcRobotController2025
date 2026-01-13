@@ -105,27 +105,25 @@ public class BlueFront extends LinearOpMode {
 //                    heading = drive.getPoseEstimate().getHeading();
 //                   // heading = Math.toRadians(heading);
 //                })
-
-
                 //---Next Balls---
-                .addTemporalMarker(() -> {
-                    LLResult result = limelight.getLatestResult();
-
-                    if (result != null && result.isValid()) {
-                        // getBotpose() returns position relative to the center of the field (0,0)
-                        Pose3D botpose = result.getBotpose();
-
-                        // Convert meters to inches (if your code uses inches)
-                        double fieldX = botpose.getPosition().x * 39.37;
-                        double fieldY = botpose.getPosition().y * 39.37;
-                        double Aprilheading = botpose.getOrientation().getYaw();
-
-                        telemetry.addData("Field X", fieldX); // Distance from center toward audience
-                        telemetry.addData("Field Y", fieldY);
-                        telemetry.addData("Pose",Math.toDegrees(Aprilheading));
-                        telemetry.update();
-                    }
-                })
+//                .addTemporalMarker(() -> {
+//                    LLResult result = limelight.getLatestResult();
+//
+//                    if (result != null && result.isValid()) {
+//                        // getBotpose() returns position relative to the center of the field (0,0)
+//                        Pose3D botpose = result.getBotpose();
+//
+//                        // Convert meters to inches (if your code uses inches)
+//                        double fieldX = botpose.getPosition().x * 39.37;
+//                        double fieldY = botpose.getPosition().y * 39.37;
+//                        double Aprilheading = botpose.getOrientation().getYaw();
+//
+//                        telemetry.addData("Field X", fieldX); // Distance from center toward audience
+//                        telemetry.addData("Field Y", fieldY);
+//                        telemetry.addData("Pose",Math.toDegrees(Aprilheading));
+//                        telemetry.update();
+//                    }
+//                })
                 .back(8)
                 .turn(Math.toRadians(46.5))
                 .addTemporalMarker(() -> armservo.setPosition(0.1385))
@@ -134,7 +132,7 @@ public class BlueFront extends LinearOpMode {
                         SampleMecanumDrive.getAccelerationConstraint(10)
                 )
                 .addTemporalMarker(() -> shooter.setVelocity(-1100))
-                .addTemporalMarker(() -> intake.setPower(0.6))
+                .addTemporalMarker(() -> intake.setPower(-0.6))
                 .back(58)
                 .addTemporalMarker(() -> {
                     heading = drive.getPoseEstimate().getHeading();
@@ -142,10 +140,6 @@ public class BlueFront extends LinearOpMode {
                 .turn(heading-Math.toRadians(45))
 
                 //.back(54)
-
-
-
-
               //  .turn(Math.toRadians(-51))
 
 

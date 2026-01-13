@@ -14,11 +14,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 @TeleOp(name="PowerOneIntakeWithMovePinpoint", group="Robot")
 public class PowerOneIntakeWithMovePinpoint extends LinearOpMode {
 
-    private DcMotor intake;
-    private Servo armservo;
+  //  private DcMotor intake;
+  //  private Servo armservo;
     public DcMotorEx shooter;
     public Servo kicker;
-    public DcMotor bootkicker;
+  //  public DcMotor bootkicker;
     RevColorSensorV3 distanceSensor;
 
     private DcMotor leftFrontDrive = null;
@@ -30,8 +30,8 @@ public class PowerOneIntakeWithMovePinpoint extends LinearOpMode {
     private GoBildaPinpointDriver odo;
     private boolean lastOptions = false;
 
-    private static final double VELO_CLOSE = 700;
-    private static final double VELO_FAR = 900;
+    private static final double VELO_CLOSE = 1600;
+    private static final double VELO_FAR = 1750;
     private final int ROBOT_OR_FIELD_CENTRIC = 1;
 
     @Override
@@ -42,9 +42,9 @@ public class PowerOneIntakeWithMovePinpoint extends LinearOpMode {
         leftBackDrive = hardwareMap.dcMotor.get("LeftBack");
         rightFrontDrive = hardwareMap.dcMotor.get("RightFront");
         rightBackDrive = hardwareMap.dcMotor.get("RightBack");
-        intake = hardwareMap.get(DcMotor.class, "intake");
-        armservo = hardwareMap.get(Servo.class, "armservo");
-        bootkicker = hardwareMap.get(DcMotor.class, "bootkicker");
+//        intake = hardwareMap.get(DcMotor.class, "intake");
+//        armservo = hardwareMap.get(Servo.class, "armservo");
+//        bootkicker = hardwareMap.get(DcMotor.class, "bootkicker");
         kicker = hardwareMap.get(Servo.class, "kicker");
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
 
@@ -67,7 +67,7 @@ public class PowerOneIntakeWithMovePinpoint extends LinearOpMode {
         // Resetting to start at 0
         odo.resetPosAndIMU();
 
-        kicker.setPosition(0.25);
+        kicker.setPosition(0.05);
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -94,7 +94,7 @@ public class PowerOneIntakeWithMovePinpoint extends LinearOpMode {
             double x = gamepad1.left_stick_x / 1.5;
             double rx = gamepad1.right_stick_x / 1.5;
 
-            // --- HEADING LOGIC (Corrected to your snippet style) ---
+
             double heading = odo.getPosition().getHeading(AngleUnit.RADIANS);
 
             double rotX, rotY;
@@ -115,35 +115,36 @@ public class PowerOneIntakeWithMovePinpoint extends LinearOpMode {
             rightBackDrive.setPower((rotY + rotX - rx) / denominator);
 
             // --- Subsystem Controls ---
-            if (gamepad2.dpad_down) {
-                bootkicker.setPower(-0.4);
-            } else {
-                bootkicker.setPower(0);
-            }
+//            if (gamepad2.dpad_down) {
+//                bootkicker.setPower(-0.4);
+//            } else {
+//                bootkicker.setPower(0);
+//            }
 
-            if ((gamepad2.y || gamepad2.x) && distanceCM < 7) {
-                kicker.setPosition(0.25);
+            if (gamepad2.y && distanceCM < 7) {
+                kicker.setPosition(0.5);
                 sleep(600);
-                kicker.setPosition(0.6);
+                kicker.setPosition(0.05);
             }
 
             if (gamepad2.a) shooter.setVelocity(VELO_CLOSE);
             if (gamepad2.b) shooter.setVelocity(VELO_FAR);
 
             // Intake toggle/hold
-            if (gamepad2.dpad_up) {
-                intake.setPower(-0.9);
-            } else {
-                intake.setPower(0);
-            }
+//            if (gamepad2.dpad_up) {
+//                intake.setPower(-0.9);
+//            } else {
+//                intake.setPower(0);
+//            }
 
-            if (gamepad2.dpad_left) armservo.setPosition(0.67);
-            if (gamepad2.dpad_right) armservo.setPosition(0.7);
+            //if (gamepad2.dpad_left) armservo.setPosition(0.67);
+           // if (gamepad2.dpad_right) armservo.setPosition(0.7);
 
             // --- Telemetry ---
             telemetry.addData("Heading (Deg)", Math.toDegrees(heading));
             telemetry.addData("Distance CM", distanceCM);
             telemetry.addData("Status", odo.getDeviceStatus());
+            telemetry.addData("Velo",shooter.getVelocity());
             telemetry.update();
         }
     }

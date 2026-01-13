@@ -17,15 +17,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 @TeleOp(name="PowerIntakeWithMoving", group="Robot")
 public class PowerOneIntakeWithMove extends LinearOpMode {
 
-    private DcMotor intake;
-    private Servo armservo;
+   // private DcMotor intake;
+  //  private Servo armservo;
     public DcMotorEx shooter;
     public Servo kicker;
-    public DcMotor bootkicker;
+ //   public DcMotor bootkicker;
     // public Servo rotator;
     RevColorSensorV3 distanceSensor;
     private static final double VELO_CLOSE = -700;//1530
-    private static final double VELO_FAR = -900;//1660
+    private static final double VELO_FAR = -1653;//1660
     private DcMotor leftFrontDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor leftBackDrive = null;
@@ -44,9 +44,9 @@ public class PowerOneIntakeWithMove extends LinearOpMode {
         leftBackDrive = hardwareMap.dcMotor.get("LeftBack");
         rightFrontDrive = hardwareMap.dcMotor.get("RightFront");
         rightBackDrive = hardwareMap.dcMotor.get("RightBack");
-        intake = hardwareMap.get(DcMotor.class, "intake");
-        armservo = hardwareMap.get(Servo.class, "armservo");
-        bootkicker = hardwareMap.get(DcMotor.class, "bootkicker");
+//        intake = hardwareMap.get(DcMotor.class, "intake");
+//        armservo = hardwareMap.get(Servo.class, "armservo");
+//        bootkicker = hardwareMap.get(DcMotor.class, "bootkicker");
 
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -62,7 +62,7 @@ public class PowerOneIntakeWithMove extends LinearOpMode {
         //  intake = hardwareMap.get(DcMotor.class, "intake");
 
 
-        kicker.setPosition(0.25);//starting kicker value
+        kicker.setPosition(0.07);//starting kicker value
         //  intake.setPower(0);
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -138,7 +138,7 @@ public class PowerOneIntakeWithMove extends LinearOpMode {
 //                armservo.setPosition(0.6);
 //            }
             if (gamepad2.dpad_down) {
-                bootkicker.setPower(-0.4);
+//                bootkicker.setPower(-0.4);
             }
 
             if (gamepad2.y) {
@@ -149,9 +149,9 @@ public class PowerOneIntakeWithMove extends LinearOpMode {
                 }
             }
             if (gamepad2.x && distanceCM <7) {
-                kicker.setPosition(0.6);
+                kicker.setPosition(0.07);
                 sleep(600);
-                kicker.setPosition(0.25);
+                kicker.setPosition(0.5);
             }
 
             if (gamepad2.a) {
@@ -162,14 +162,14 @@ public class PowerOneIntakeWithMove extends LinearOpMode {
             }
 //0.6-0.7
             if (gamepad2.dpad_up) {
-                intake.setPower(-0.9);
+//                intake.setPower(-0.9);
             }
             if (gamepad2.dpad_left) {
-                armservo.setPosition(0.1375);//lower position
+//                armservo.setPosition(0.1375);//lower position
             }
 
-            telemetry.addData("Rotator Power", intake.getPower());
-            telemetry.addData("armservo Pos", armservo.getPosition());
+//            telemetry.addData("Rotator Power", intake.getPower());
+//            telemetry.addData("armservo Pos", armservo.getPosition());
             telemetry.addData("Distance", distanceCM);
 
             telemetry.update();

@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 public class PinpointLocalizer implements Localizer {
 
     int num_setpos_calls =0;
-    private final GoBildaPinpointDriver odo;
+    public final GoBildaPinpointDriver odo;
     public static int num_instances = 0;
     private Pose2d poseEstimate = new Pose2d(0, 0, 0);//chance x and y back to 0,0
 
