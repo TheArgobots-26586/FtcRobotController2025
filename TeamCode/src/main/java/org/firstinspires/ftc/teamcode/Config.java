@@ -16,7 +16,6 @@ class Config {
     public DcMotor bootkicker;
     public RevColorSensorV3 distanceSensor;
     public Servo armservo;
-    public PinpointLocalizer pinpointLocalizer;
     public static final double KICKER_DOWN = 0.25;
     public static final double KICKER_UP = 0.6;
     // 1200 from 53-65 inches  - camera to april tag
@@ -45,7 +44,6 @@ class Config {
         kicker.setPosition(Config.KICKER_DOWN);
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        pinpointLocalizer = new PinpointLocalizer(hardwareMap);
 
     }
 }
