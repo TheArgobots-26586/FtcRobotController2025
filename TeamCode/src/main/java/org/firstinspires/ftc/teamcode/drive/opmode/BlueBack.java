@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
-@Autonomous(name = "BlueFront", group = "Robot")
+@Autonomous(name = "BlueBlack", group = "Robot")
 public class BlueBack extends LinearOpMode {
 
     private DcMotor intake = null;
@@ -58,13 +58,13 @@ public class BlueBack extends LinearOpMode {
 
         Pose2d startPose;
         if (position.equals("RedBack")) {
-            startPose = new Pose2d(12, -60, Math.toRadians(180));
+            startPose = new Pose2d(-60, -12, Math.toRadians(180));
         } else if (position.equals("BlueBack")) {
             startPose = new Pose2d(-60, 12, Math.toRadians(90));
         } else if (position.equals("BlueFront")) {
-            startPose = new Pose2d(45, 45, 45);
+            startPose = new Pose2d(49, 49, Math.toRadians(45));
         } else {
-            startPose = new Pose2d(-12, -60, 0);
+            startPose = new Pose2d(49, -49, Math.toRadians(-45));
         }
         kicker.setPosition(0.25);
 
