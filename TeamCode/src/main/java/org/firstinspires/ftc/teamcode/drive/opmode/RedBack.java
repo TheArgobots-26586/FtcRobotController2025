@@ -22,7 +22,7 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 @Autonomous(name = "BlueFront", group = "Robot")
-public class BlueFront extends LinearOpMode {
+public class RedBack extends LinearOpMode {
 
     private DcMotor intake = null;
     private Servo rotator = null;
@@ -34,7 +34,7 @@ public class BlueFront extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     private RevColorSensorV3 distanceSensor;
-    String position = "BlueFront";
+    String position = "RedBack";
     double heading;
 
 
@@ -68,9 +68,8 @@ public class BlueFront extends LinearOpMode {
         }
         kicker.setPosition(0.25);
 
-        TrajectorySequence traj21BlueFront = drive.trajectorySequenceBuilder(startPose)
+        TrajectorySequence traj21RedBack = drive.trajectorySequenceBuilder(startPose)
                 .addTemporalMarker(() -> shooter.setVelocity(-1090))
-                .back(53)
                 .waitSeconds(1)
                 .addTemporalMarker(() -> kicker.setPosition(0.8))
                 .waitSeconds(1)
@@ -105,42 +104,39 @@ public class BlueFront extends LinearOpMode {
 //                    heading = drive.getPoseEstimate().getHeading();
 //                   // heading = Math.toRadians(heading);
 //                })
+
+
                 //---Next Balls---
-//                .addTemporalMarker(() -> {
-//                    LLResult result = limelight.getLatestResult();
-//
-//                    if (result != null && result.isValid()) {
-//                        // getBotpose() returns position relative to the center of the field (0,0)
-//                        Pose3D botpose = result.getBotpose();
-//
-//                        // Convert meters to inches (if your code uses inches)
-//                        double fieldX = botpose.getPosition().x * 39.37;
-//                        double fieldY = botpose.getPosition().y * 39.37;
-//                        double Aprilheading = botpose.getOrientation().getYaw();
-//
-//                        telemetry.addData("Field X", fieldX); // Distance from center toward audience
-//                        telemetry.addData("Field Y", fieldY);
-//                        telemetry.addData("Pose",Math.toDegrees(Aprilheading));
-//                        telemetry.update();
-//                    }
-//                })
-                .back(8)
-                .turn(Math.toRadians(46.5))
+
+
+                .forward(12)
+                .turn(Math.toRadians(-90))
                 .addTemporalMarker(() -> armservo.setPosition(0.1385))
-                .forward(58,
+                .forward(60,
                         SampleMecanumDrive.getVelocityConstraint(18, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(10)
                 )
                 .addTemporalMarker(() -> shooter.setVelocity(-1100))
-                .addTemporalMarker(() -> intake.setPower(-0.6))
-                .back(58)
+                .addTemporalMarker(() -> intake.setPower(0.6))
+                .back(60)
                 .addTemporalMarker(() -> {
                     heading = drive.getPoseEstimate().getHeading();
                 })
-                .turn(heading-Math.toRadians(45))
+                .turn(-heading)
+                .back(12)
+                .addTemporalMarker(() -> shooter.setVelocity(-1090))
+                .waitSeconds(1)
+                .addTemporalMarker(() -> kicker.setPosition(0.8))
+                .waitSeconds(1)
+                .addTemporalMarker(() -> kicker.setPosition(0.25))
+                .waitSeconds(1)
 
                 //.back(54)
-              //  .turn(Math.toRadians(-51))
+
+
+
+
+                //  .turn(Math.toRadians(-51))
 
 
 
@@ -170,12 +166,21 @@ public class BlueFront extends LinearOpMode {
                 })
                 .waitSeconds(1)
                 .addTemporalMarker(() -> kicker.setPosition(0.25))
+
+
+
+
+
 //                .waitSeconds(0.25)
 //                .addTemporalMarker(() -> kicker.setPosition(0.25))
 //                .waitSeconds(0.25)
 //                .addTemporalMarker(() -> kicker.setPosition(0.8))
 //                .waitSeconds(0.25)
 //                .addTemporalMarker(() -> kicker.setPosition(0.25))
+
+
+
+
                 .build();
 
 
@@ -188,12 +193,12 @@ public class BlueFront extends LinearOpMode {
         drive.setPoseEstimate(startPose);
 
         kicker.setPosition(0.33);
-      //  bootkicker.setPower(-0.6);
+        //  bootkicker.setPower(-0.6);
 
         runtime.reset();
 
 
-        drive.followTrajectorySequence(traj21BlueFront);
+        drive.followTrajectorySequence(traj21RedBack);
 
         while (!isStopRequested() && opModeIsActive()) {
             drive.update();

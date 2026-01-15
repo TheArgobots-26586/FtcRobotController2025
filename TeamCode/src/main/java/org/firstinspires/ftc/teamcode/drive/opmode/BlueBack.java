@@ -21,8 +21,8 @@ import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
-@Autonomous(name = "BlueFront", group = "Robot")
-public class BlueFront extends LinearOpMode {
+@Autonomous(name = "BlueBack", group = "Robot")
+public class BlueBack extends LinearOpMode {
 
     private DcMotor intake = null;
     private Servo rotator = null;
@@ -69,8 +69,8 @@ public class BlueFront extends LinearOpMode {
         kicker.setPosition(0.25);
 
         TrajectorySequence traj21BlueFront = drive.trajectorySequenceBuilder(startPose)
-                .addTemporalMarker(() -> shooter.setVelocity(-1090))
-                .back(53)
+                .addTemporalMarker(() -> shooter.setVelocity(-1600))
+                .addTemporalMarker(() -> rotator.setPosition(30))
                 .waitSeconds(1)
                 .addTemporalMarker(() -> kicker.setPosition(0.8))
                 .waitSeconds(1)
@@ -105,7 +105,7 @@ public class BlueFront extends LinearOpMode {
 //                    heading = drive.getPoseEstimate().getHeading();
 //                   // heading = Math.toRadians(heading);
 //                })
-                //---Next Balls---
+//                ---Next Balls---
 //                .addTemporalMarker(() -> {
 //                    LLResult result = limelight.getLatestResult();
 //
@@ -124,33 +124,29 @@ public class BlueFront extends LinearOpMode {
 //                        telemetry.update();
 //                    }
 //                })
-                .back(8)
-                .turn(Math.toRadians(46.5))
+                .forward(24)
+                .turn(Math.toRadians(90))
                 .addTemporalMarker(() -> armservo.setPosition(0.1385))
                 .forward(58,
-                        SampleMecanumDrive.getVelocityConstraint(18, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(10)
+                        SampleMecanumDrive.getVelocityConstraint(20, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(11)
                 )
-                .addTemporalMarker(() -> shooter.setVelocity(-1100))
-                .addTemporalMarker(() -> intake.setPower(-0.6))
+                .addTemporalMarker(() -> shooter.setVelocity(-1600))
+                .addTemporalMarker(() -> intake.setPower(-1))
+                .addTemporalMarker(() -> bootkicker.setPower(-1))
                 .back(58)
                 .addTemporalMarker(() -> {
                     heading = drive.getPoseEstimate().getHeading();
                 })
-                .turn(heading-Math.toRadians(45))
-
-                //.back(54)
-              //  .turn(Math.toRadians(-51))
-
-
-
+                .turn(-heading)
+                .back(24)
 
                 .addTemporalMarker(() -> kicker.setPosition(0.8))
                 .waitSeconds(1)
                 .addTemporalMarker(() -> kicker.setPosition(0.25))
                 .waitSeconds(1)
                 .addTemporalMarker(() -> bootkicker.setPower(-0.7))
-                .addTemporalMarker(() -> intake.setPower(-0.9))
+                .addTemporalMarker(() -> intake.setPower(-1))
                 .waitSeconds(1)
                 .addTemporalMarker(() -> {
                     if (distanceSensor.getDistance(DistanceUnit.CM) < 7.5) {
@@ -170,12 +166,21 @@ public class BlueFront extends LinearOpMode {
                 })
                 .waitSeconds(1)
                 .addTemporalMarker(() -> kicker.setPosition(0.25))
+
+
+
+
+
 //                .waitSeconds(0.25)
 //                .addTemporalMarker(() -> kicker.setPosition(0.25))
 //                .waitSeconds(0.25)
 //                .addTemporalMarker(() -> kicker.setPosition(0.8))
 //                .waitSeconds(0.25)
 //                .addTemporalMarker(() -> kicker.setPosition(0.25))
+
+
+
+
                 .build();
 
 
@@ -188,7 +193,7 @@ public class BlueFront extends LinearOpMode {
         drive.setPoseEstimate(startPose);
 
         kicker.setPosition(0.33);
-      //  bootkicker.setPower(-0.6);
+        //  bootkicker.setPower(-0.6);
 
         runtime.reset();
 
