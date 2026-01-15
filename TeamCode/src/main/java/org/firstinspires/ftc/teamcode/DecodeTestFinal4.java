@@ -16,6 +16,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 @TeleOp(name="DecodeTestFinal4", group="Robot")
 public class DecodeTestFinal4 extends LinearOpMode {
     private final double SERVO_CENTER = 0.5;
+    private double currentPos = 0.5;
     private final double SERVO_MIN = 0.0;
     private final double SERVO_MAX = 1.0;
     private final double SERVO_RAD_RANGE = Math.toRadians(180);
@@ -109,22 +110,20 @@ public class DecodeTestFinal4 extends LinearOpMode {
             double dy = ygoal - yPos;
             double distance_from_goal = sqrt(dx*dx + dy*dy);
 
-
-            //servo allignment
             double angleToGoal = Math.atan2(dy, dx);
             double relativeAngle = angleToGoal - heading;
+            //servo allignment
 
-            while (relativeAngle > Math.PI)  relativeAngle -= 2 * Math.PI;
+            while (relativeAngle > Math.PI) relativeAngle -= 2 * Math.PI;
             while (relativeAngle < -Math.PI) relativeAngle += 2 * Math.PI;
 
             double servoPosition = SERVO_CENTER + (relativeAngle / SERVO_RAD_RANGE);
             servoPosition = Math.max(SERVO_MIN, Math.min(SERVO_MAX, servoPosition));
-            //allign servo to goal with x
+                //allign servo to goal with x
             if (gamepad2.x) {
-                turret.setPosition(servoPosition);
-            } else {
-                turret.setPosition(SERVO_CENTER);
+                currentPos = servoPosition;
             }
+
 //            if (gamepad1.a) {
 //
 //                double targetAngle = Math.atan2(ygoal - yPos, xgoal - xPos) + Math.PI;
@@ -173,6 +172,7 @@ public class DecodeTestFinal4 extends LinearOpMode {
                     }
                     break;
             }
+            turret.setPosition(currentPos);
 
             telemetry.addData("MODE", currentState);
             telemetry.addData("Dist to Goal", "%.2f", distance_from_goal);
