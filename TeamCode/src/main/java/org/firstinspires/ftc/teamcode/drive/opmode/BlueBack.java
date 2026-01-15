@@ -70,7 +70,7 @@ public class BlueBack extends LinearOpMode {
 
         TrajectorySequence traj21BlueFront = drive.trajectorySequenceBuilder(startPose)
                 .addTemporalMarker(() -> shooter.setVelocity(-1600))
-                .addTemporalMarker(() -> rotator.setPosition(30))
+                .addTemporalMarker(() -> rotator.setPosition(30)
                 .waitSeconds(1)
                 .addTemporalMarker(() -> kicker.setPosition(0.8))
                 .waitSeconds(1)
