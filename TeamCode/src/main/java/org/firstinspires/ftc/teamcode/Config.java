@@ -16,14 +16,14 @@ class Config {
     public DcMotor bootkicker;
     public RevColorSensorV3 distanceSensor;
     public Servo armservo;
-    public static final double KICKER_DOWN = 0.25;
+    public static final double KICKER_DOWN = 0.225;
     public static final double KICKER_UP = 0.6;
     // 1200 from 53-65 inches  - camera to april tag
     public static final double VELO_CLOSE = -1100; // 1100 from less than 33in from april tag will fail. Works from 63-33in
-    public static final double ARM_SERVO_POSITION = 0.1375;
+    public static final double ARM_SERVO_POSITION = 0.24;
     public static final double INTAKE_IDLE = -0.1;
     public static final double BOOTKICKER_IDLE = -0.1;
-    public static final double INTAKE_COLLECT = -1;
+    public static final double INTAKE_COLLECT = -0.9;
     public static final double BOOTKICKER_COLLECT = -0.4;
     public static final double INTAKE_SHOOT = -0.2;
     public static final double BOOTKICKER_SHOOT = -0.2;
