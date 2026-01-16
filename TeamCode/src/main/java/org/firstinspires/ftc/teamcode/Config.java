@@ -1,12 +1,11 @@
 package org.firstinspires.ftc.teamcode;
-
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 
 class Config {
 
@@ -15,6 +14,7 @@ class Config {
     public Servo kicker;
     public DcMotor bootkicker;
     public RevColorSensorV3 distanceSensor;
+    public Limelight3A limelight;
     public Servo armservo;
     public static final double KICKER_DOWN = 0.225;
     public static final double KICKER_UP = 0.6;
@@ -28,6 +28,11 @@ class Config {
     public static final double INTAKE_SHOOT = -0.2;
     public static final double BOOTKICKER_SHOOT = -0.2;
     public static final double MAX_COLOR_SENSED_DISTANCE = 7;
+    public static final double CAMERA_CENTER_POS = 0.35;
+    public static final double SERVO_GAIN = 0.0067;
+    public static final double ROTATOR_MIN = 0.45;
+    public static final double ROTATOR_MAX = 1.0;
+
 
     public Config(HardwareMap hardwareMap) {
         leftFront  = hardwareMap.get(DcMotor.class, "LeftFront");
@@ -39,6 +44,7 @@ class Config {
         shooter    = hardwareMap.get(DcMotorEx.class, "shooter");
         bootkicker = hardwareMap.get(DcMotor.class, "bootkicker");
         armservo = hardwareMap.get(Servo.class, "armservo");
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
         kicker.setPosition(Config.KICKER_DOWN);
