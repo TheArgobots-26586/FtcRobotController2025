@@ -49,11 +49,14 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
 //================CONSTANTS================//
     public static final double KICKER_DOWN = 0.225;
     public static final double KICKER_UP = 0.6;
-    public static final double ARM_SERVO_POSITION = 0.24;
+    public static final double ARM_SERVO_POSITION = 0.245;
     public static final double INTAKE_IDLE = -0.1;
     public static final double BOOTKICKER_IDLE = -0.1;
     public static final double INTAKE_COLLECT = -0.9;
     public static final double BOOTKICKER_COLLECT = -0.4;
+    public static final double INTAKE_ABORT = 0.5;
+    public static final double BOOTKICKER_ABORT = 0.5;
+    public static final double ARM_ABORT = 0.3;
     public static final double INTAKE_SHOOT = -0.2;
     public static final double BOOTKICKER_SHOOT = -0.2;
     public static final double MAX_COLOR_SENSED_DISTANCE = 7;
@@ -78,7 +81,8 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
     enum RobotState {
         IDLE,
         COLLECT,
-        SHOOT
+        SHOOT,
+        ABORT
     }
 
     RobotState currentState = RobotState.IDLE;
@@ -180,6 +184,7 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
 
             boolean a = gamepad2.a;
             boolean b = gamepad2.b;
+            boolean xPressed = gamepad2.x;
 
             if (a && !lastA) {
                 if (currentState == RobotState.COLLECT) {
@@ -206,6 +211,9 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
 
                 }
             }
+            if(xPressed) {
+                currentState = RobotState.ABORT;
+            }
             lastA = a;
             lastB = b;
 
@@ -216,6 +224,7 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
                 case IDLE:
                     shooter.setVelocity(shooterVelocity(distanceInches));
                     intake.setPower(INTAKE_IDLE);
+                    turret.setPosition(0.9);
                     bootkicker.setPower(BOOTKICKER_IDLE);
                     kicker.setPosition(KICKER_DOWN);
                     break;
@@ -235,7 +244,7 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
                         kicker.setPosition(KICKER_UP);
                         sleep(600);
                         kicker.setPosition(KICKER_DOWN);
-                        sleep(100);
+                        sleep(200);
                         telemetry.addData("kicker shoot", true);
                         telemetry.update();
                     }
@@ -248,6 +257,11 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
                     telemetry.addData("shoot mode", true);
                     telemetry.update();
                     break;
+                case ABORT:
+                    intake.setPower(INTAKE_ABORT);
+                    bootkicker.setPower(BOOTKICKER_ABORT);
+                    armservo.setPosition(ARM_ABORT);
+                    kicker.setPosition(KICKER_DOWN);
             }
 
             //telemetry
