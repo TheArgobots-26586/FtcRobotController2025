@@ -21,8 +21,8 @@ import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
-@Autonomous(name = "BlueFront - Auton", group = "Robot")
-public class BlueFront extends LinearOpMode {
+@Autonomous(name = "FinalDecodeBlueFront", group = "Robot")
+public class FinalDecodeBlueFront extends LinearOpMode {
 
     private DcMotor intake = null;
     private Servo rotator = null;
@@ -36,6 +36,16 @@ public class BlueFront extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     private RevColorSensorV3 distanceSensor;
+    public static final double KICKER_DOWN = 0.225;
+    public static final double KICKER_UP = 0.6;
+    public static final double ARM_SERVO_POSITION = 0.24;
+    public static final double INTAKE_IDLE = -0.1;
+    public static final double BOOTKICKER_IDLE = -0.1;
+    public static final double INTAKE_COLLECT = -0.9;
+    public static final double BOOTKICKER_COLLECT = -0.4;
+    public static final double INTAKE_SHOOT = -0.2;
+    public static final double BOOTKICKER_SHOOT = -0.2;
+    public static final double MAX_COLOR_SENSED_DISTANCE = 7;
     String position = "BlueFront";
     double heading;
     private Servo turret;
@@ -46,7 +56,7 @@ public class BlueFront extends LinearOpMode {
     public void runOpMode() {
         distanceSensor = hardwareMap.get(RevColorSensorV3.class, "sensor_color_distance");
         intake = hardwareMap.get(DcMotor.class, "intake");
-        rotator = hardwareMap.get(Servo.class, "rotator");
+       // rotator = hardwareMap.get(Servo.class, "rotator");
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         kicker = hardwareMap.get(Servo.class, "kicker");
         bootkicker = hardwareMap.get(DcMotor.class, "bootkicker");
@@ -58,7 +68,7 @@ public class BlueFront extends LinearOpMode {
         //LIMELIGHT SETUP
         limelight.pipelineSwitch(0); // AprilTag pipeline
         limelight.start();
-       // LLResult result = limelight.getLatestResult();
+        // LLResult result = limelight.getLatestResult();
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -80,45 +90,53 @@ public class BlueFront extends LinearOpMode {
         kicker.setPosition(0.225);
 
         TrajectorySequence traj21BlueFront = drive.trajectorySequenceBuilder(startPose)
-                .addTemporalMarker(() -> shooter.setVelocity(1090))
                 .back(53)
-                .waitSeconds(1)
-                .addTemporalMarker(() -> kicker.setPosition(0.6))
-                .waitSeconds(1)
-                .addTemporalMarker(() -> kicker.setPosition(0.225))
-                .waitSeconds(1)
-                .addTemporalMarker(() -> bootkicker.setPower(-0.4))
-                .addTemporalMarker(() -> armservo.setPosition(0.24))
-                .addTemporalMarker(() -> intake.setPower(-0.9))
-                .waitSeconds(1)
+                .addTemporalMarker(() -> {
+                    shooter.setVelocity(1100);
+                    turret.setPosition(0.9);
+                })
+                .waitSeconds(1.5)
                 .addTemporalMarker(() -> {
                     LLResult result = limelight.getLatestResult();
-                    tx = result.getTx();
-                    ty = result.getTy();
-                    double val = Math.min(Math.max(0.8, turret.getPosition()+(tx/360)), 1);
-                    turret.setPosition(val);
-                    sleep(1000);
-                    telemetry.addData("servo target pos", val);
+                    if (result != null && result.isValid()) {
+                        telemetry.addData("Apriltags", tx);
+                        tx = result.getTx();
+                        ty = result.getTy();
+                        double val = Math.min(Math.max(0.8, turret.getPosition() + (tx / 360)), 1);
+                        turret.setPosition(val);
+                        telemetry.addData("servo target pos", val);
+                        telemetry.update();
+                    }
+
+                })
+                .waitSeconds(0.5)
+                .addTemporalMarker(() -> {
+                    telemetry.addData("Kicker code","");
                     telemetry.update();
+                    kicker.setPosition(KICKER_UP);
+
                 })
-                .addTemporalMarker(() -> {
-
-                    if (distanceSensor.getDistance(DistanceUnit.CM) < 7.5) {
-
-                        kicker.setPosition(0.6);
-
-                    }
-                })
+                .waitSeconds(0.7)
+                .addTemporalMarker(() -> kicker.setPosition(KICKER_DOWN))
                 .waitSeconds(1)
-                .addTemporalMarker(() -> kicker.setPosition(0.225))
+                .addTemporalMarker(() -> armservo.setPosition(ARM_SERVO_POSITION))
+                .addTemporalMarker(() -> intake.setPower(INTAKE_COLLECT))
+                .addTemporalMarker(() -> bootkicker.setPower(-0.4))
                 .waitSeconds(1)
                 .addTemporalMarker(() -> {
                     if (distanceSensor.getDistance(DistanceUnit.CM) < 7.5) {
-                        kicker.setPosition(0.6);
-
+                        kicker.setPosition(KICKER_UP);
                     }
                 })
-                .waitSeconds(1)
+                .waitSeconds(0.8)
+                .addTemporalMarker(() -> kicker.setPosition(KICKER_DOWN))
+                .waitSeconds(0.8)
+                .addTemporalMarker(() -> {
+                    if (distanceSensor.getDistance(DistanceUnit.CM) < 7.5) {
+                        kicker.setPosition(KICKER_UP);
+                    }
+                })
+                .waitSeconds(0.8)
                 .addTemporalMarker(() -> kicker.setPosition(0.225))
 
 //                .addTemporalMarker(() -> {
@@ -146,39 +164,44 @@ public class BlueFront extends LinearOpMode {
 //                })
                 .back(8)
                 .turn(Math.toRadians(46.5))
-                .addTemporalMarker(() -> armservo.setPosition(0.24))
-                .forward(58,
+                .addTemporalMarker(() -> armservo.setPosition(ARM_SERVO_POSITION))
+                .forward(50,
                         SampleMecanumDrive.getVelocityConstraint(18, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(10)
                 )
                 .addTemporalMarker(() -> shooter.setVelocity(1100))
                 .addTemporalMarker(() -> intake.setPower(-0.6))
-                .back(58)
+                .back(50)
                 .addTemporalMarker(() -> {
                     heading = drive.getPoseEstimate().getHeading();
                 })
                 .turn(heading-Math.toRadians(45))
 
                 //.back(54)
-                //  .turn(Math.toRadians(-51))
+//                  .turn(Math.toRadians(-51))
 
                 .addTemporalMarker(() -> {
                     LLResult result = limelight.getLatestResult();
-                    tx = result.getTx();
-                    ty = result.getTy();
-                    double val = Math.min(Math.max(0.8, turret.getPosition()+(tx/360)), 1);
-                    turret.setPosition(val);
-                    sleep(1000);
-                    telemetry.addData("servo target pos", val);
-                    telemetry.update();
-                })
+                    if (result != null && result.isValid()) {
+                        telemetry.addData("Apriltags", tx);
+                        tx = result.getTx();
+                        ty = result.getTy();
+                        double val = Math.min(Math.max(0.8, turret.getPosition() + (tx / 360)), 1);
+                        turret.setPosition(val);
+                        telemetry.addData("servo target pos", val);
+                        telemetry.update();
+                    }
 
+                })
+//
                 .addTemporalMarker(() -> kicker.setPosition(0.6))
-                .waitSeconds(1)
+                .waitSeconds(0.7)
                 .addTemporalMarker(() -> kicker.setPosition(0.225))
-                .waitSeconds(1)
-                .addTemporalMarker(() -> bootkicker.setPower(-0.7))
-                .addTemporalMarker(() -> intake.setPower(-0.9))
+                .waitSeconds(0.6)
+                .addTemporalMarker(() -> armservo.setPosition(ARM_SERVO_POSITION))
+                .addTemporalMarker(() -> intake.setPower(INTAKE_COLLECT))
+                .addTemporalMarker(() -> bootkicker.setPower(-0.4))
+
                 .waitSeconds(1)
                 .addTemporalMarker(() -> {
                     if (distanceSensor.getDistance(DistanceUnit.CM) < 7.5) {
@@ -189,25 +212,26 @@ public class BlueFront extends LinearOpMode {
                 })
                 .waitSeconds(1)
                 .addTemporalMarker(() -> kicker.setPosition(0.225))
-                .waitSeconds(1)
+                .waitSeconds(0.8)
                 .addTemporalMarker(() -> {
                     if (distanceSensor.getDistance(DistanceUnit.CM) < 7.5) {
                         kicker.setPosition(0.6);
 
                     }
                 })
-                .waitSeconds(1)
-                .addTemporalMarker(() -> kicker.setPosition(0.225))
+//                .waitSeconds(1)
+//                .addTemporalMarker(() -> kicker.setPosition(0.225))
 //                .waitSeconds(0.25)
 //                .addTemporalMarker(() -> kicker.setPosition(0.25))
 //                .waitSeconds(0.25)
 //                .addTemporalMarker(() -> kicker.setPosition(0.8))
 //                .waitSeconds(0.25)
 //                .addTemporalMarker(() -> kicker.setPosition(0.25))
+                .strafeLeft(29)
                 .build();
 
 
-        drive.setPoseEstimate(startPose);
+//        drive.setPoseEstimate(startPose);
 
         waitForStart();
 
@@ -219,8 +243,6 @@ public class BlueFront extends LinearOpMode {
         //  bootkicker.setPower(-0.6);
 
         runtime.reset();
-
-
         drive.followTrajectorySequence(traj21BlueFront);
 
         while (!isStopRequested() && opModeIsActive()) {

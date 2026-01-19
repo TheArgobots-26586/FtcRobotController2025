@@ -32,28 +32,31 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
     private static final double CAMERA_PITCH_DEGREES = 5.0;    // camera upward tilt
     private static final double SERVO_CENTER = 0.9;
 
-// Servo position that points the mechanism straight ahead (aligned with robot center)
+    // Servo position that points the mechanism straight ahead (aligned with robot center)
     private static final double SERVO_MIN = 0.8;
 
-// Lowest safe servo position to prevent hitting the robot or hard stops
+    // Lowest safe servo position to prevent hitting the robot or hard stops
     private static final double SERVO_MAX = 1;
 
-// Highest safe servo position to prevent hitting the robot or hard stops
+    // Highest safe servo position to prevent hitting the robot or hard stops
     private static final double SERVO_GAIN = 0.005;
 
-// How much the servo moves per degree of horizontal error (tx); higher = faster movement
+    // How much the servo moves per degree of horizontal error (tx); higher = faster movement
     private static final double TX_DEADBAND = 4.0;
 
     double distanceInches = 0;
 
-//================CONSTANTS================//
+    //================CONSTANTS================//
     public static final double KICKER_DOWN = 0.225;
     public static final double KICKER_UP = 0.6;
-    public static final double ARM_SERVO_POSITION = 0.24;
+    public static final double ARM_SERVO_POSITION = 0.245;
     public static final double INTAKE_IDLE = -0.1;
     public static final double BOOTKICKER_IDLE = -0.1;
     public static final double INTAKE_COLLECT = -0.9;
     public static final double BOOTKICKER_COLLECT = -0.4;
+    public static final double INTAKE_ABORT = 0.5;
+    public static final double BOOTKICKER_ABORT = 0.5;
+    public static final double ARM_ABORT = 0.3;
     public static final double INTAKE_SHOOT = -0.2;
     public static final double BOOTKICKER_SHOOT = -0.2;
     public static final double MAX_COLOR_SENSED_DISTANCE = 7;
@@ -74,11 +77,12 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
     Range range2 = new Range(55, 80, 1200);
     Range range3 = new Range(80, Integer.MAX_VALUE, 1400);
 
-//STATE MACHINE SETUP
+    //STATE MACHINE SETUP
     enum RobotState {
         IDLE,
         COLLECT,
-        SHOOT
+        SHOOT,
+        ABORT
     }
 
     RobotState currentState = RobotState.IDLE;
@@ -96,7 +100,7 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
     double newPos;
     @Override
     public void runOpMode() {
-    //HARDWARE MAP
+        //HARDWARE MAP
         distanceSensor = hardwareMap.get(RevColorSensorV3.class, "sensor_color_distance");
         leftFront  = hardwareMap.get(DcMotor.class, "LeftFront");
         leftBack   = hardwareMap.get(DcMotor.class, "LeftBack");
@@ -111,11 +115,11 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
         turret = hardwareMap.get(Servo.class, "rotator");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
-    //LIMELIGHT SETUP
+        //LIMELIGHT SETUP
         limelight.pipelineSwitch(0); // AprilTag pipeline
         limelight.start();
 
-    //INITIALIZATIONS
+        //INITIALIZATIONS
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
@@ -180,6 +184,7 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
 
             boolean a = gamepad2.a;
             boolean b = gamepad2.b;
+            boolean xPressed = gamepad2.x;
 
             if (a && !lastA) {
                 if (currentState == RobotState.COLLECT) {
@@ -206,6 +211,9 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
 
                 }
             }
+            if(xPressed) {
+                currentState = RobotState.ABORT;
+            }
             lastA = a;
             lastB = b;
 
@@ -216,6 +224,7 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
                 case IDLE:
                     shooter.setVelocity(shooterVelocity(distanceInches));
                     intake.setPower(INTAKE_IDLE);
+                    turret.setPosition(0.9);
                     bootkicker.setPower(BOOTKICKER_IDLE);
                     kicker.setPosition(KICKER_DOWN);
                     break;
@@ -235,7 +244,7 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
                         kicker.setPosition(KICKER_UP);
                         sleep(600);
                         kicker.setPosition(KICKER_DOWN);
-                        sleep(100);
+                        sleep(200);
                         telemetry.addData("kicker shoot", true);
                         telemetry.update();
                     }
@@ -248,6 +257,11 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
                     telemetry.addData("shoot mode", true);
                     telemetry.update();
                     break;
+                case ABORT:
+                    intake.setPower(INTAKE_ABORT);
+                    bootkicker.setPower(BOOTKICKER_ABORT);
+                    armservo.setPosition(ARM_ABORT);
+                    kicker.setPosition(KICKER_DOWN);
             }
 
             //telemetry
@@ -290,4 +304,3 @@ class Range {
         this.speed = speed;
     }
 }
-
