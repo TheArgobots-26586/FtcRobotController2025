@@ -46,22 +46,28 @@ public class ArmTest extends LinearOpMode {
         while (opModeIsActive()) {
 
             if (gamepad1.dpad_down) {
-                armservo.setPosition(0.125);//lower pos
+                armservo.setPosition(0.29);//lower pos
             }
             if (gamepad1.dpad_right) {
-                armservo.setPosition(0.15);
+                armservo.setPosition(0.28);
             }
             if (gamepad1.b) {
-                armservo.setPosition(0.13);
+                armservo.setPosition(0.26);
             }
             if (gamepad1.dpad_left) {
-                armservo.setPosition(0.135);
+                armservo.setPosition(0.24);
             }
             if (gamepad1.dpad_up) {
-                armservo.setPosition(0.1375);//higher pos
+                armservo.setPosition(0.22);//higher pos
+            }
+            if(gamepad1.y) {
+                armservo.setPosition(0.25);
             }
             if (gamepad1.a) {
                 intake.setPower(-0.9);
+            }
+            if (gamepad1.x) {
+                intake.setPower(0.9);
             }
 
 

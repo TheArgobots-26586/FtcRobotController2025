@@ -14,11 +14,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 @TeleOp(name="PowerOneIntakeWithMovePinpoint", group="Robot")
 public class PowerOneIntakeWithMovePinpoint extends LinearOpMode {
 
-  //  private DcMotor intake;
-  //  private Servo armservo;
+    private DcMotor intake;
+    private Servo armservo;
     public DcMotorEx shooter;
     public Servo kicker;
-  //  public DcMotor bootkicker;
+    public DcMotor bootkicker;
     RevColorSensorV3 distanceSensor;
 
     private DcMotor leftFrontDrive = null;
@@ -42,9 +42,9 @@ public class PowerOneIntakeWithMovePinpoint extends LinearOpMode {
         leftBackDrive = hardwareMap.dcMotor.get("LeftBack");
         rightFrontDrive = hardwareMap.dcMotor.get("RightFront");
         rightBackDrive = hardwareMap.dcMotor.get("RightBack");
-//        intake = hardwareMap.get(DcMotor.class, "intake");
-//        armservo = hardwareMap.get(Servo.class, "armservo");
-//        bootkicker = hardwareMap.get(DcMotor.class, "bootkicker");
+        intake = hardwareMap.get(DcMotor.class, "intake");
+        armservo = hardwareMap.get(Servo.class, "armservo");
+        bootkicker = hardwareMap.get(DcMotor.class, "bootkicker");
         kicker = hardwareMap.get(Servo.class, "kicker");
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
 
@@ -67,7 +67,7 @@ public class PowerOneIntakeWithMovePinpoint extends LinearOpMode {
         // Resetting to start at 0
         odo.resetPosAndIMU();
 
-        kicker.setPosition(0.05);
+        kicker.setPosition(0.225);
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -79,6 +79,7 @@ public class PowerOneIntakeWithMovePinpoint extends LinearOpMode {
         while (opModeIsActive()) {
             // IMPORTANT: Update() must be called to get new data
             odo.update();
+            armservo.setPosition(0.24);
 
             double distanceCM = distanceSensor.getDistance(DistanceUnit.CM);
 
@@ -113,18 +114,18 @@ public class PowerOneIntakeWithMovePinpoint extends LinearOpMode {
             leftBackDrive.setPower((rotY - rotX + rx) / denominator);
             rightFrontDrive.setPower((rotY - rotX - rx) / denominator);
             rightBackDrive.setPower((rotY + rotX - rx) / denominator);
-
+            if (gamepad2.dpad_up) {
+                intake.setPower(-0.9);
+            }
             // --- Subsystem Controls ---
-//            if (gamepad2.dpad_down) {
-//                bootkicker.setPower(-0.4);
-//            } else {
-//                bootkicker.setPower(0);
-//            }
+            if (gamepad2.dpad_down) {
+                bootkicker.setPower(-0.4);
+            }
 
             if (gamepad2.y && distanceCM < 7) {
-                kicker.setPosition(0.5);
+                kicker.setPosition(0.6);
                 sleep(600);
-                kicker.setPosition(0.05);
+                kicker.setPosition(0.225);
             }
 
             if (gamepad2.a) shooter.setVelocity(VELO_CLOSE);

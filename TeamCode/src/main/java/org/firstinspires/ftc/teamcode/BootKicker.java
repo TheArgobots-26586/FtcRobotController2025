@@ -34,17 +34,17 @@ public class BootKicker extends LinearOpMode {
 
 
             if (gamepad1.x) {
-                bootkicker.setPower(0.35);
+                bootkicker.setPower(-0.35);
             }
 
-            if (gamepad1.x) {
-                bootkicker.setPower(0.55);
+            if (gamepad1.y) {
+                bootkicker.setPower(-0.55);
             }
-            if (gamepad1.x) {
-                bootkicker.setPower(0.75);
+            if (gamepad1.a) {
+                bootkicker.setPower(-0.75);
             }
-            if (gamepad1.x) {
-                bootkicker.setPower(1);
+            if (gamepad1.b) {
+                bootkicker.setPower(-0.4);
             }
 
 

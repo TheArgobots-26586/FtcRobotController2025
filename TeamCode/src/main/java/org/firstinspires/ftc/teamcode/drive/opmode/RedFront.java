@@ -25,7 +25,7 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 public class RedFront extends LinearOpMode {
 
     private DcMotor intake = null;
-    private Servo rotator = null;
+    private Servo turret = null;
     private DcMotorEx shooter = null;
     private Servo kicker = null;
     private DcMotor bootkicker = null;
@@ -42,7 +42,7 @@ public class RedFront extends LinearOpMode {
     public void runOpMode() {
         distanceSensor = hardwareMap.get(RevColorSensorV3.class, "sensor_color_distance");
         intake = hardwareMap.get(DcMotor.class, "intake");
-        rotator = hardwareMap.get(Servo.class, "rotator");
+        turret = hardwareMap.get(Servo.class, "rotator");
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         kicker = hardwareMap.get(Servo.class, "kicker");
         bootkicker = hardwareMap.get(DcMotor.class, "bootkicker");
@@ -180,7 +180,7 @@ public class RedFront extends LinearOpMode {
 //                .addTemporalMarker(() -> kicker.setPosition(0.25))
 
 
-        drive.setPoseEstimate(startPose);
+       // drive.setPoseEstimate(startPose);
 
         waitForStart();
 
