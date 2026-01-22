@@ -75,7 +75,9 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
 
     Range range1 = new Range(0, 55, 1100);
     Range range2 = new Range(55, 80, 1200);
-    Range range3 = new Range(80, Integer.MAX_VALUE, 1400);
+
+    Range range4 = new Range(112, Integer.MAX_VALUE, 1434);
+    Range range3 = new Range(80, 112, 1410);
 
     //STATE MACHINE SETUP
     enum RobotState {
@@ -202,10 +204,26 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
                 } else {
                     currentState = RobotState.SHOOT;
                     if (result != null && result.isValid()) {
-                        double val = Math.min(Math.max(0.8, turret.getPosition()+(tx/360)), 1);
-                        turret.setPosition(val);
-                        sleep(1000);
-                        telemetry.addData("servo target pos", val);
+                        int detectedID = result.getFiducialResults().get(0).getFiducialId();
+                        if (detectedID == 20) {
+                            double val = Math.min(Math.max(0.8, turret.getPosition() + (tx / 360)), 1);
+                            turret.setPosition(val - 0.005);
+                            sleep(900);
+                            telemetry.addData("servo target pos blue", val - 0.01);
+                            telemetry.update();
+                        } else if (detectedID == 24) {
+                            double val = Math.min(Math.max(0.8, turret.getPosition() + (tx / 360)), 1);
+                            turret.setPosition(val + 0.005);
+                            sleep(900);
+                            telemetry.addData("servo target pos red", val + 0.01);
+                            telemetry.update();
+                        }
+
+
+//                        double val = Math.min(Math.max(0.8, turret.getPosition() + (tx / 360)), 1);
+//                        turret.setPosition(val);
+                      //  sleep(900);
+                      //  telemetry.addData("servo target pos", val);
                         telemetry.update();
                     }
 
@@ -222,6 +240,7 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
             switch (currentState) {
 
                 case IDLE:
+
                     shooter.setVelocity(shooterVelocity(distanceInches));
                     intake.setPower(INTAKE_IDLE);
                     turret.setPosition(0.9);
@@ -242,7 +261,7 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
                     if (distanceCM < 7) {
                         sleep(100);
                         kicker.setPosition(KICKER_UP);
-                        sleep(600);
+                        sleep(500);
                         kicker.setPosition(KICKER_DOWN);
                         sleep(200);
                         telemetry.addData("kicker shoot", true);
@@ -277,19 +296,27 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
             telemetry.addData("tx (deg)", tx);
             telemetry.addData("ty (deg)", ty);
             telemetry.addData("servo current pos", turret.getPosition());
-            telemetry.addData("Distance (in)", "%.1f", distanceInches);
+          //  telemetry.addData("Distance (in)", "%.1f", distanceInches);
             telemetry.update();
         }
     }
     public double shooterVelocity(double distanceInInches) {
         if (distanceInInches>=range1.l && distanceInInches<range1.r){
+            telemetry.addData("range1", range1.r);
             return range1.speed;
+
         }
         else if (distanceInInches>=range2.l && distanceInInches<range2.r){
+            telemetry.addData("range2", range2.r);
             return range2.speed;
         }
-        else{
+        else if(distanceInInches>=range3.l && distanceInInches<range3.r) {
+            telemetry.addData("range3", range3.r);
             return range3.speed;
+        }
+        else{
+            telemetry.addData("range4", range4.r);
+            return range4.speed;
         }
     }
 
