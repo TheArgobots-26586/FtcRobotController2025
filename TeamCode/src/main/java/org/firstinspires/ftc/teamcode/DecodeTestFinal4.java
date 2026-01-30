@@ -123,7 +123,8 @@ public class DecodeTestFinal4 extends LinearOpMode {
             if (gamepad2.x) {
                 currentPos = servoPosition;
             }
-
+            //Auto allignment of turret using odometry<---!
+//Chasis Rotation from Odo
 //            if (gamepad1.a) {
 //
 //                double targetAngle = Math.atan2(ygoal - yPos, xgoal - xPos) + Math.PI;

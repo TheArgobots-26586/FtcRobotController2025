@@ -107,14 +107,14 @@ public class FinalAutonBlueFront extends LinearOpMode {
                     }
 
                 })
-                .waitSeconds(2)
+                .waitSeconds(2.25)
                 .addTemporalMarker(() -> {
                     telemetry.addData("Kicker code","");
                     telemetry.update();
                     kicker.setPosition(KICKER_UP);
 
                 })
-                .waitSeconds(0.6)
+                .waitSeconds(0.7)
                 .addTemporalMarker(() -> kicker.setPosition(KICKER_DOWN))
                 .waitSeconds(0.6)
                 .addTemporalMarker(() -> armservo.setPosition(ARM_SERVO_POSITION+0.005))

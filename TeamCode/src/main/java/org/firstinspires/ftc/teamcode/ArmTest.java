@@ -5,6 +5,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -18,6 +19,7 @@ public class ArmTest extends LinearOpMode {
 
     private Servo armservo;
     private DcMotor intake;
+    private ColorRangeSensor distanceSensor;
 
 
 
@@ -26,6 +28,7 @@ public class ArmTest extends LinearOpMode {
 
         armservo = hardwareMap.get(Servo.class, "armservo");
         intake = hardwareMap.get(DcMotor.class, "intake");
+        distanceSensor = hardwareMap.get(RevColorSensorV3.class, "sensor_color_distance");
 
 
         // --- Initialize intake/shooter ---
@@ -44,7 +47,7 @@ public class ArmTest extends LinearOpMode {
         //distance sensor
 
         while (opModeIsActive()) {
-
+            distanceSensor.getDistance(DistanceUnit.CM);
             if (gamepad1.dpad_down) {
                 armservo.setPosition(0.29);//lower pos
             }
@@ -74,6 +77,7 @@ public class ArmTest extends LinearOpMode {
 
             telemetry.addData("armservo Pos", armservo.getPosition());
             telemetry.addData("intake Pow", intake.getPower());
+            telemetry.addData("Ditance", distanceSensor.getDistance(DistanceUnit.CM));
            // telemetry.addData("armservo Pos", armservo.get());
 
 
