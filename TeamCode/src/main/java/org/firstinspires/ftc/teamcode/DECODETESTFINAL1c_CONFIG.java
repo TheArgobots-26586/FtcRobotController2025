@@ -3,8 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import static java.lang.Math.sqrt;
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -18,31 +16,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 
-@TeleOp(name="DecodeTestFinal1b", group="Robot")
-public class DecodeTestFinal1b extends LinearOpMode {
-    private static final double CAMERA_HEIGHT_INCHES = 12.9;   // camera lens height
-    private static final double TAG_HEIGHT_INCHES    = 29.5;   // AprilTag center height
-    private static final double CAMERA_PITCH_DEGREES = 5.0;    // camera upward tilt
-    private static final double SERVO_CENTER = 0.9;
-// Servo position that points the mechanism straight ahead (aligned with robot center)
+@TeleOp(name="DecodeTestFinal1c - Config", group="Robot")
+public class DECODETESTFINAL1c_CONFIG extends LinearOpMode {
 
-    private static final double SERVO_MIN = 0.8;
-// Lowest safe servo position to prevent hitting the robot or hard stops
-
-    private static final double SERVO_MAX = 1;
-// Highest safe servo position to prevent hitting the robot or hard stops
-
-    private static final double SERVO_GAIN = 0.005;
-// How much the servo moves per degree of horizontal error (tx); higher = faster movement
-
-    private static final double TX_DEADBAND = 4.0;
-    double distanceInches = 0;
-// Range (in degrees) around the target where the servo is considered "aligned" and stops moving
-    private static final double TURN_GAIN = 0.02;
-    private static final double MAX_TURN = 0.4;
-//    private static final double TX_DEADBAND = 1.0; // degrees
-
-    private Limelight3A limelight;
     private DcMotor intake;
     private DcMotor leftFront, leftBack, rightFront, rightBack;
     private DcMotorEx shooter;
@@ -52,13 +28,13 @@ public class DecodeTestFinal1b extends LinearOpMode {
     private RevColorSensorV3 distanceSensor;
     private PinpointLocalizer pinpointLocalizer;
     double distance_from_goal = 0;
-    double xPos =0;
+    double xPos = 0;
     double yPos = 0;
     double robot_heading = 0;
     double ygoal = 121;
     double xgoal = 60;
 
-    private static final double VELO_CLOSE = 1200; // 1200 from 53-65 inches  - camera to april tag
+    // 1200 from 53-65 inches  - camera to april tag
     private static final double targetPower= -1100; // 1100 from less than 33in from april tag will fail. Works from 63-33in
 
     enum RobotState {
@@ -71,18 +47,18 @@ public class DecodeTestFinal1b extends LinearOpMode {
 
     boolean lastA = false;
     boolean lastB = false;
-   // boolean lastDpadRight = false;
+    boolean lastDpadRight = false;
 
     // Latch for auto-fire
     boolean firingEnabled = false;
     boolean lastOptions = false;
     private Servo turret = null;
     public Servo armservo = null;
-    double tx=0;
-    double ty=0;
+
     @Override
     public void runOpMode() {
         distanceSensor = hardwareMap.get(RevColorSensorV3.class, "sensor_color_distance");
+
         leftFront  = hardwareMap.get(DcMotor.class, "LeftFront");
         leftBack   = hardwareMap.get(DcMotor.class, "LeftBack");
         rightFront = hardwareMap.get(DcMotor.class, "RightFront");
@@ -93,14 +69,8 @@ public class DecodeTestFinal1b extends LinearOpMode {
         shooter    = hardwareMap.get(DcMotorEx.class, "shooter");
         bootkicker = hardwareMap.get(DcMotor.class, "bootkicker");
         armservo = hardwareMap.get(Servo.class, "armservo");
-        turret = hardwareMap.get(Servo.class, "rotator");
-    //    PinpointLocalizer pos = new PinpointLocalizer(hardwareMap);
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
-
-        // ----------- Limelight Setup -----------
-        limelight.pipelineSwitch(0); // AprilTag pipeline
-        limelight.start();
-
+        // turret = hardwareMap.get(Servo.class, "rotator");
+        PinpointLocalizer pos = new PinpointLocalizer(hardwareMap);
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
@@ -163,128 +133,100 @@ public class DecodeTestFinal1b extends LinearOpMode {
             rightFront.setPower((rotY - rotX - rx) / denom);
             rightBack.setPower((rotY + rotX - rx) / denom);
 
-            //distance mesuring
-            // --- REPLACEMENT FOR LIMELIGHT BLOCK ---
-            LLResult result = limelight.getLatestResult();
-
-            if (result != null && result.isValid()) {
-                tx = result.getTx();
-                ty = result.getTy();
-
-                double totalVerticalAngle = CAMERA_PITCH_DEGREES + ty;
-                // Update the existing distanceInches variable (no 'double' prefix)
-                distanceInches = (TAG_HEIGHT_INCHES - CAMERA_HEIGHT_INCHES) /
-                        Math.tan(Math.toRadians(totalVerticalAngle));
-
-                telemetry.addData("Tag Seen", true);
-            } else {
-                telemetry.addData("Tag Seen", false);
-                // Optional: set distanceInches to a default if tag lost
-                // distanceInches = 0;
-                tx = 0;
-            }
-
-            // Fixed position for the arm
-            armservo.setPosition(0.24);
-// ---------------------------------------
-
-
-//            double tx = result.getTx(); // horizontal offset (deg)
-//            double ty = result.getTy(); // vertical offset (deg)
-
-//            double totalVerticalAngle =
-//                    CAMERA_PITCH_DEGREES + ty;
-//            distanceInches =
-//                    (TAG_HEIGHT_INCHES - CAMERA_HEIGHT_INCHES) /
-//                            Math.tan(Math.toRadians(totalVerticalAngle));
-            telemetry.addData("Tag Seen", true);
-            telemetry.addData("tx (deg)", tx);
-            telemetry.addData("ty (deg)", ty);
-            telemetry.addData("Distance (in)", "%.1f", distanceInches);
-
 
             //  FIRE BUTTON (edge) Not NEEDED ANYMORE
+            boolean pressed = gamepad2.dpad_right && !lastDpadRight;
+            lastDpadRight = gamepad2.dpad_right;
 
-        //    lastDpadRight = gamepad2.dpad_right;
+            armservo.setPosition(Config.ARM_SERVO_POSITION);
 
-            armservo.setPosition(0.24);
-
-//            double xPos = pos.odo.getPosX(DistanceUnit.INCH);
-//            double yPos = pos.odo.getPosY(DistanceUnit.INCH);
-//            double robot_heading = pos.odo.getHeading(AngleUnit.RADIANS);
-//            double distancey = 70-yPos;
-//            double distancex = 140-xPos;
-//            double distance_from_goal = sqrt(distancex*distancex+distancey*distancey);
-           // double angleToGoal = Math.atan2(ygoal - yPos, xgoal - xPos);
+            double xPos = pos.odo.getPosX(DistanceUnit.INCH);
+            double yPos = pos.odo.getPosY(DistanceUnit.INCH);
+            double robot_heading = pos.odo.getHeading(AngleUnit.RADIANS);
+            double distancey = 70-yPos;
+            double distancex = 140-xPos;
+            double distance_from_goal = sqrt(distancex*distancex+distancey*distancey);
+            double angleToGoal = Math.atan2(ygoal - yPos, xgoal - xPos);
 
 
-            //double relativeAngle = angleToGoal - robot_heading;
-//            while (relativeAngle > Math.PI)  relativeAngle -= 2 * Math.PI;
-//            while (relativeAngle < -Math.PI) relativeAngle += 2 * Math.PI;
-//
-//
-//            double servoPosition = SERVO_CENTER + (relativeAngle / SERVO_RAD_RANGE);
-        //    servoPosition = Math.max(SERVO_MIN, Math.min(SERVO_MAX, servoPosition));
+            double relativeAngle = angleToGoal - robot_heading;
+            while (relativeAngle > Math.PI)  relativeAngle -= 2 * Math.PI;
+            while (relativeAngle < -Math.PI) relativeAngle += 2 * Math.PI;
+
+
+            double servoPosition = Config.SERVO_CENTER + (relativeAngle / Config.SERVO_RAD_RANGE);
+            servoPosition = Math.max(Config.SERVO_MIN, Math.min(Config.SERVO_MAX, servoPosition));
 
 //            if (gamepad1.a) {
 //                turret.setPosition(servoPosition);
 //            } else {
 //                turret.setPosition(SERVO_CENTER);
 //            }
+            if (gamepad1.x) {
 
+                double targetAngle = Math.atan2(ygoal - yPos, xgoal - xPos) + Math.PI;
+
+                double angleError = targetAngle - heading;
+
+                while (angleError > Math.PI)  angleError -= 2 * Math.PI;
+                while (angleError < -Math.PI) angleError += 2 * Math.PI;
+                rx = angleError * Kp;
+
+                rx = Math.max(-0.5, Math.min(0.5, rx));
+            }
             // STATE MACHINE
             switch (currentState) {
 
                 case IDLE:
-                    if (distanceInches>5 && distanceInches<55){
-                        shooter.setVelocity(1100);
+                    if (distance_from_goal>5 && distance_from_goal<55){
+                        shooter.setVelocity(Config.closeVelocity);
                     }
-                    else if (distanceInches>55 && distanceInches<68){
-                        shooter.setVelocity(1200);
+                    else if (distance_from_goal>55 && distance_from_goal<65){
+                        shooter.setVelocity(Config.midVelocity);
                     }
                     else{
-                        shooter.setVelocity(1475);
+                        shooter.setVelocity(Config.farVelocity);
                     }
                     firingEnabled = false;
-                   // shooter.setVelocity(VELO_CLOSE);
-                    intake.setPower(-0.1);
-                    bootkicker.setPower(-0.1);
-                    kicker.setPosition(0.25);
+                    shooter.setVelocity(Config.VELO_CLOSE);
+                    intake.setPower(Config.INTAKE_IDLE);
+                    bootkicker.setPower(Config.BOOTKICKER_IDLE);
+                    kicker.setPosition(Config.KICKER_DOWN);
                     break;
 
                 case COLLECT:
-                    if (distanceInches>5 && distanceInches<55){
-                        shooter.setVelocity(1100);
+                    if (distance_from_goal>5 && distance_from_goal<55){
+                        shooter.setVelocity(Config.closeVelocity);
                     }
-                    else if (distanceInches>55 && distanceInches<68){
-                        shooter.setVelocity(1200);
+                    else if (distance_from_goal>55 && distance_from_goal<65){
+                        shooter.setVelocity(Config.midVelocity);
                     }
                     else{
-                        shooter.setVelocity(1475);
+                        shooter.setVelocity(Config.farVelocity);
                     }
                     firingEnabled = false;
                     //shooter.setVelocity(VELO_CLOSE);
-                    kicker.setPosition(0.25);
-                    bootkicker.setPower(-0.4);
-                    intake.setPower(-0.9);
+                    kicker.setPosition(Config.KICKER_DOWN);
+                    bootkicker.setPower(Config.BOOTKICKER_COLLECT);
+                    intake.setPower(Config.INTAKE_COLLECT);
                     //armservo.setPosition(0.1375);
-                   // armservo.setPosition(0.67);
+                    // armservo.setPosition(0.67);
 
                     break;
 
                 case SHOOT:
-                    if (distanceInches>5 && distanceInches<57){
-                        shooter.setVelocity(1100);
+                    if (distance_from_goal>5 && distance_from_goal<57){
+                        shooter.setVelocity(Config.closeVelocity);
                     }
-                    else if (distanceInches>57 && distanceInches<68){
-                        shooter.setVelocity(1200);
+                    else if (distance_from_goal>57 && distance_from_goal<65){
+                        shooter.setVelocity(Config.midVelocity);
                     }
                     else{
-                        shooter.setVelocity(1475);
+                        shooter.setVelocity(Config.farVelocity);
                     }
-                    intake.setPower(-0.5);
-                    bootkicker.setPower(-0.3);
-                  //  shooter.setVelocity(VELO_CLOSE);
+                    intake.setPower(Config.INTAKE_COLLECT);
+                    bootkicker.setPower(Config.BOOTKICKER_COLLECT);
+                    //  shooter.setVelocity(VELO_CLOSE);
                     // enable auto-fire on button press
 
                     // auto-fire while balls exist
@@ -296,24 +238,10 @@ public class DecodeTestFinal1b extends LinearOpMode {
 
                     // stop when no ball
                     if (distanceCM >= 7) {
-                       // firingEnabled = false;
+                        // firingEnabled = false;
                         kicker.setPosition(0.25);
                     }
                     break;
-            }
-            if (gamepad1.x) {
-
-                if (Math.abs(tx) > TX_DEADBAND) {
-                    double servoOffset = tx * SERVO_GAIN;
-                    double newPos = SERVO_CENTER + servoOffset;
-                    newPos = Math.max(SERVO_MIN, Math.min(SERVO_MAX, newPos));
-                    turret.setPosition(newPos);
-                } else {
-                    turret.setPosition(SERVO_CENTER); // aligned
-                }
-
-            } else {
-                turret.setPosition(SERVO_CENTER); // not aligning
             }
 
 
@@ -334,11 +262,13 @@ public class DecodeTestFinal1b extends LinearOpMode {
             telemetry.addData("x:", pinpointLocalizer.getPoseEstimate().getX());
             telemetry.addData("y:", pinpointLocalizer.getPoseEstimate().getY());
             telemetry.addData("heading:", pinpointLocalizer.getHeading());
-            telemetry.addData("Distance From Goal:", distanceInches);
+            telemetry.addData("Distance From Goal:", distance_from_goal);
             telemetry.update();
         }
     }
 }
+
+
 //Gamepad 1 (Driver)
 //Left stick → Drive (field-centric)
 //Right stick X → Turn

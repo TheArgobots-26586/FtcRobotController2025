@@ -29,15 +29,17 @@ public class rotatorTest extends LinearOpMode {
                 rotator.setPosition(0.5);//lower pos
             }
             if (gamepad1.dpad_right) {
-                rotator.setPosition(0.15);
+                rotator.setPosition(0.85);
             }
             if (gamepad1.dpad_down) {
-                rotator.setPosition(0);
+                rotator.setPosition(0.9);
             }
             if(gamepad1.dpad_up) {
                 rotator.setPosition(1.0);
             }
-
+            if(gamepad1.x) {
+                rotator.setPosition(0.8);
+            }
             telemetry.addData("rotator Pos", rotator.getPosition());
             telemetry.update();
         }
