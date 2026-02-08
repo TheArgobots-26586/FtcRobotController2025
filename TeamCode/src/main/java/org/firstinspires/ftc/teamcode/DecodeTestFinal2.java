@@ -51,6 +51,7 @@ public class DecodeTestFinal2 extends LinearOpMode {
     private final double CAMERA_HEIGHT_INCHES = 16;
     private final double TAG_HEIGHT_INCHES    = 29.875;
     private final double CAMERA_PITCH_DEGREES = 10;
+    double distanceCM = 0;
 
     @Override
     public void runOpMode() {
@@ -109,9 +110,10 @@ public class DecodeTestFinal2 extends LinearOpMode {
 
         waitForStart();
         //distance sensor
-        double distanceCM = distanceSensor.getDistance(DistanceUnit.CM);
+
         while (opModeIsActive()) {
 
+            distanceCM =distanceSensor.getDistance(DistanceUnit.CM);
             // --- Drivetrain field-centric ---
             double y  = -gamepad1.left_stick_y / 1.5;
             double x  =  gamepad1.left_stick_x / 1.5;

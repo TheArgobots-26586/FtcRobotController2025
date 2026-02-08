@@ -12,8 +12,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 
-@TeleOp(name="DECODE_FINAL_TELEOP", group="Robot")
-public class DECODE_FINAL_TELEOP extends LinearOpMode {
+@TeleOp(name="DECODE_FINAL_TELEOP2", group="Robot")
+public class DECODE_FINAL_TELEOP2 extends LinearOpMode {
 
 /*================CONTROLS================
 
@@ -73,11 +73,11 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
     private RevColorSensorV3 distanceSensor;
     private PinpointLocalizer pinpointLocalizer;
 
-    Range range1 = new Range(0, 55, 1100);
-    Range range2 = new Range(55, 80, 1200);
+    Range2 range1 = new Range2(0, 55, 1100);
+    Range2 range2 = new Range2(55, 80, 1200);
 
-    Range range4 = new Range(112, Integer.MAX_VALUE, 1434);
-    Range range3 = new Range(80, 112, 1410);
+    Range2 range4 = new Range2(112, Integer.MAX_VALUE, 1438);
+    Range2 range3 = new Range2(80, 112, 1410);
 
     //STATE MACHINE SETUP
     enum RobotState {
@@ -102,7 +102,7 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
     double newPos;
     boolean gamepad1LastA = false;
     boolean aPressed = false;
-
+    int detectedID = 20;
     @Override
     public void runOpMode() {
         //HARDWARE MAP
@@ -175,8 +175,10 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
                 if(aPressed && !gamepad1LastA) {
                     gamepad1.rumble(100);
                 }
-
-                tx = result.getTx();
+                if (result != null && result.isValid()) {
+                    detectedID = result.getFiducialResults().get(0).getFiducialId();
+                    tx = result.getTx();
+                }
                 ty = result.getTy();
 
                 double totalVerticalAngle = CAMERA_PITCH_DEGREES + ty;
@@ -210,30 +212,30 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
                 } else {
                     currentState = RobotState.SHOOT;
                     //   gamepad1.rumble(100);
-                    if (result != null && result.isValid()) {
-                        int detectedID = result.getFiducialResults().get(0).getFiducialId();
+                    //if (result != null && result.isValid()) {
+                    //int detectedID = result.getFiducialResults().get(0).getFiducialId();
 
-                        if (detectedID == 20) {
-                            double val = Math.min(Math.max(0.75, turret.getPosition() + (tx / 360)), 1);
-                            turret.setPosition(val - 0.005);
-                            sleep(900);
-                            telemetry.addData("servo target pos blue", val );
-                            telemetry.update();
-                        } else if (detectedID == 24) {
-                            double val = Math.min(Math.max(0.75, turret.getPosition() + (tx / 360)), 1);
-                            turret.setPosition(val + 0.005);
-                            sleep(900);
-                            telemetry.addData("servo target pos red", val );
-                            telemetry.update();
-                        }
+                    if (detectedID == 20) {
+                        double val = Math.min(Math.max(0.75, turret.getPosition() + (tx / 360)), 1);
+                        turret.setPosition(val - 0.005);
+                        sleep(900);
+                        telemetry.addData("servo target pos blue", val );
+                        telemetry.update();
+                    } else if (detectedID == 24) {
+                        double val = Math.min(Math.max(0.75, turret.getPosition() + (tx / 360)), 1);
+                        turret.setPosition(val + 0.005);
+                        sleep(900);
+                        telemetry.addData("servo target pos red", val );
+                        telemetry.update();
+                    }
 
 
 //                        double val = Math.min(Math.max(0.8, turret.getPosition() + (tx / 360)), 1);
 //                        turret.setPosition(val);
-                        //  sleep(900);
-                        //  telemetry.addData("servo target pos", val);
-                        telemetry.update();
-                    }
+                    //  sleep(900);
+                    //  telemetry.addData("servo target pos", val);
+                    telemetry.update();
+                    //}
 
                 }
             }
@@ -335,11 +337,11 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
     }
 
 }
-class Range {
+class Range2 {
     double l;
     double r;
     double speed;
-    Range(double l, double r, double speed) {
+    Range2(double l, double r, double speed) {
         this.l = l;
         this.r = r;
         this.speed = speed;

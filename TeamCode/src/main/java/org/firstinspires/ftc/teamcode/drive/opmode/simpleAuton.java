@@ -1,10 +1,14 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
+import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,137 +16,106 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.PoseStorage;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
+import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 @Autonomous(name = "simpleAuton", group = "Robot")
 public class simpleAuton extends LinearOpMode {
 
-    private Limelight3A limelight;
     private DcMotor intake = null;
-    private Servo rotator = null;
+   // private Servo rotator = null;
     private DcMotorEx shooter = null;
     private Servo kicker = null;
     private DcMotor bootkicker = null;
+    double tx = 0;
+    double ty = 0;
     private Servo armservo = null;
+    private Limelight3A limelight;
 
-    private int detectedTag = -1;
     private ElapsedTime runtime = new ElapsedTime();
-
-    // Set your starting position here
+    private RevColorSensorV3 distanceSensor;
+    public static final double KICKER_DOWN = 0.225;
+    public static final double KICKER_UP = 0.6;
+    public static final double ARM_SERVO_POSITION = 0.24;
+    public static final double INTAKE_IDLE = -0.1;
+    public static final double BOOTKICKER_IDLE = -0.1;
+    public static final double INTAKE_COLLECT = -0.9;
+    public static final double BOOTKICKER_COLLECT = -0.4;
+    public static final double INTAKE_SHOOT = -0.2;
+    public static final double BOOTKICKER_SHOOT = -0.2;
+    public static final double MAX_COLOR_SENSED_DISTANCE = 7;
     String position = "BlueBack";
+    double heading;
+    private Servo turret;
+
 
     @Override
     public void runOpMode() {
-        // --- Hardware Mapping ---
+        distanceSensor = hardwareMap.get(RevColorSensorV3.class, "sensor_color_distance");
         intake = hardwareMap.get(DcMotor.class, "intake");
-        rotator = hardwareMap.get(Servo.class, "rotator");
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         kicker = hardwareMap.get(Servo.class, "kicker");
         bootkicker = hardwareMap.get(DcMotor.class, "bootkicker");
         armservo = hardwareMap.get(Servo.class, "armservo");
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        turret = hardwareMap.get(Servo.class, "rotator");
+
+
+        //LIMELIGHT SETUP
+        limelight.pipelineSwitch(0); // AprilTag pipeline
+        limelight.start();
+
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+        TrajectoryVelocityConstraint slowVel = SampleMecanumDrive.getVelocityConstraint(10, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH);
+        TrajectoryAccelerationConstraint slowAccel = SampleMecanumDrive.getAccelerationConstraint(10);
 
-        // --- Start Pose Logic (Fixed duplicated IF) ---
         Pose2d startPose;
         if (position.equals("RedBack")) {
-            startPose = new Pose2d(12, -60, Math.toRadians(180));
+            startPose = new Pose2d(-60, -12, Math.toRadians(0));
         } else if (position.equals("BlueBack")) {
-            startPose = new Pose2d(-12, -60, Math.toRadians(90));
+            startPose = new Pose2d(72, -12, Math.toRadians(180));
+        } else if (position.equals("BlueFront")) {
+            startPose = new Pose2d(49, 49, Math.toRadians(45));
         } else {
-            startPose = new Pose2d(-12, -60, 0); // Default fallback
+            startPose = new Pose2d(49, -49, Math.toRadians(-45));
         }
-        drive.setPoseEstimate(startPose);
-
-        // --- Limelight Init ---
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(0);
-        limelight.start();
-
-        // --- Detection Loop (Before Start) ---
-        while (!isStarted() && !isStopRequested()) {
-            LLResult result = limelight.getLatestResult();
-            if (result != null && result.isValid()) {
-                for (LLResultTypes.FiducialResult fid : result.getFiducialResults()) {
-                    int id = fid.getFiducialId();
-                    if (id == 21 || id == 22 || id == 23) {
-                        detectedTag = id;
-                        break;
-                    }
-                }
-            }
-            telemetry.addData("Status", "INITIALIZED - PLACE ROBOT AT " + startPose.toString());
-            telemetry.addData("Detected AprilTag", detectedTag);
-            telemetry.addData("Selected Position", position);
-            telemetry.update();
-        }
-
-        // --- Build Trajectories ---
-        TrajectorySequence traj21BlueBack = drive.trajectorySequenceBuilder(startPose)
-                .addTemporalMarker(() -> shooter.setVelocity(1600))
-                .waitSeconds(1)
-                .splineToLinearHeading(new Pose2d(-36, -36, Math.toRadians(90)), Math.toRadians(90))
-                .waitSeconds(0.25)
-                .strafeTo(new Vector2d(-55, -36))
-                .lineToLinearHeading(new Pose2d(-12, -60, Math.toRadians(0)))
-                .addTemporalMarker(() -> kicker.setPosition(0.6))
-                .waitSeconds(0.25)
-                .addTemporalMarker(() -> kicker.setPosition(0.25))
-                .waitSeconds(0.25)
-                .addTemporalMarker(() -> kicker.setPosition(0.6))
-                .waitSeconds(0.25)
-                .addTemporalMarker(() -> kicker.setPosition(0.25))
-                .waitSeconds(0.25)
-                .addTemporalMarker(() -> kicker.setPosition(0.6))
-                .waitSeconds(0.25)
-                .addTemporalMarker(() -> kicker.setPosition(0.25))
+        kicker.setPosition(0.225);
+        TrajectorySequence traj21BlueFront = drive.trajectorySequenceBuilder(startPose)
+                .lineTo(new Vector2d(15,12))
                 .build();
 
+
+//        drive.setPoseEstimate(startPose);
+
         waitForStart();
+
         if (isStopRequested()) return;
 
+        drive.setPoseEstimate(startPose);
+
+        kicker.setPosition(0.225);
+        //  bootkicker.setPower(-0.6);
+
         runtime.reset();
+        drive.followTrajectorySequence(traj21BlueFront);
 
-        // --- Initial Actuator Setup ---
-        kicker.setPosition(0.33);
-        bootkicker.setPower(-0.4);
-        intake.setPower(-0.9);
-        armservo.setPosition(0.1375);
+        while (!isStopRequested() && opModeIsActive()) {
+            drive.update();
+            Pose2d poseEstimate = drive.getPoseEstimate();
 
-        // --- Execution with LIVE position printing ---
-        if (position.equals("BlueBack")) {
-            // Use Async so we can update telemetry in the loop below
-            drive.followTrajectorySequenceAsync(traj21BlueBack);
+            telemetry.addData("x", poseEstimate.getX());
+            telemetry.addData("y", poseEstimate.getY());
+            telemetry.addData("heading", Math.toDegrees(poseEstimate.getHeading()));
+            telemetry.addData("Pose Resets", drive.getNumSetPosCalls());
+            telemetry.addData("numinstances", PinpointLocalizer.num_instances);
+            telemetry.update();
         }
-
-        // This loop runs WHILE the robot is moving
-        while (opModeIsActive() && drive.isBusy()) {
-            drive.update(); // Tells RoadRunner to move the motors
-            printLiveTelemetry(drive);
-        }
-
-        // --- Finalize & Pose Storage ---
-        Pose2d finalPose = drive.getPoseEstimate();
-        PoseStorage.currentPose = finalPose;
-
-        // Keep printing final position until the OpMode is stopped
-        while (opModeIsActive()) {
-            telemetry.addData("STATUS", "AUTON COMPLETE");
-            printLiveTelemetry(drive);
-        }
-    }
-
-    private void printLiveTelemetry(SampleMecanumDrive drive) {
-        Pose2d pose = drive.getPoseEstimate();
-        telemetry.addData("Current X", String.format("%.2f", pose.getX()));
-        telemetry.addData("Current Y", String.format("%.2f", pose.getY()));
-        telemetry.addData("Heading", String.format("%.2f deg", Math.toDegrees(pose.getHeading())));
-        telemetry.addData("Runtime", runtime.toString());
-        telemetry.update();
     }
 }
