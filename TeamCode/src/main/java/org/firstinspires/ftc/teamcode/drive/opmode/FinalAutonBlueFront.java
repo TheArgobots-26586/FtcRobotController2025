@@ -35,8 +35,8 @@ public class FinalAutonBlueFront extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     private RevColorSensorV3 distanceSensor;
-    public static final double KICKER_DOWN = 0.225;
-    public static final double KICKER_UP = 0.6;
+    public static final double KICKER_DOWN = 0.4;
+    public static final double KICKER_UP = 0.9;
     public static final double ARM_SERVO_POSITION = 0.24;
     public static final double INTAKE_IDLE = -0.1;
     public static final double BOOTKICKER_IDLE = -0.1;
