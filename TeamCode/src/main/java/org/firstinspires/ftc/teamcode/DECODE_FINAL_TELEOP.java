@@ -47,8 +47,8 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
     double distanceInches = 0;
 
     //================CONSTANTS================//
-    public static final double KICKER_DOWN = 0.225;
-    public static final double KICKER_UP = 0.6;
+    public static final double KICKER_DOWN = 0.4;
+    public static final double KICKER_UP = 0.9;
     public static final double ARM_SERVO_POSITION = 0.245;
     public static final double INTAKE_IDLE = -0.1;
     public static final double BOOTKICKER_IDLE = -0.1;
@@ -99,6 +99,7 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
     public Servo armservo = null;
     double tx=0;
     double ty=0;
+    int balls_shot = 0;
     double newPos;
     boolean gamepad1LastA = false;
     boolean aPressed = false;
@@ -253,13 +254,18 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
                     intake.setPower(INTAKE_IDLE);
                     turret.setPosition(0.9);
                     bootkicker.setPower(BOOTKICKER_IDLE);
-                    kicker.setPosition(KICKER_DOWN);
+                    //kicker.setPosition(KICKER_DOWN);
                     armservo.setPosition(0.24);
+                    balls_shot = 0;
                     break;
 
                 case COLLECT:
+                    balls_shot = 0;
+                    if (distanceCM < 7) {
+                        kicker.setPosition(0.8);
+                    }
                     shooter.setVelocity(shooterVelocity(distanceInches));
-                    kicker.setPosition(KICKER_DOWN);
+                    //kicker.setPosition(KICKER_DOWN);
                     bootkicker.setPower(BOOTKICKER_COLLECT);
                     intake.setPower(INTAKE_COLLECT);
                     turret.setPosition(0.9);
@@ -269,7 +275,7 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
                 case SHOOT:
                     shooter.setVelocity(shooterVelocity(distanceInches));
                     // auto-fire while balls exist
-                    if (distanceCM < 7) {
+                    if (distanceCM < 7  || balls_shot == 0) {
                         sleep(100);
                         kicker.setPosition(KICKER_UP);
                         sleep(500);
@@ -277,6 +283,7 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
                         sleep(200);
                         telemetry.addData("kicker shoot", true);
                         telemetry.update();
+                        balls_shot++;
                     }
                     // stop when no ball
                     if (distanceCM >= 7) {
@@ -298,6 +305,7 @@ public class DECODE_FINAL_TELEOP extends LinearOpMode {
             }
 
             //telemetry
+            telemetry.addData("Kicker Pos: ", kicker.getPosition());
             telemetry.addData("MODE", currentState);
             telemetry.addData("Distance (cm)", distanceCM);
             telemetry.addData("Current State is:", currentState);
