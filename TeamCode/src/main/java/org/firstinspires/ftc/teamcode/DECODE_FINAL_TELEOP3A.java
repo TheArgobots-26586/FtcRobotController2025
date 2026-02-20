@@ -31,8 +31,6 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
 
 ==========================================*/
 
-
-
     private static final double CAMERA_HEIGHT_INCHES = 12.9;   // camera lens height
     private static final double TAG_HEIGHT_INCHES    = 29.5;   // AprilTag center height
     private static final double CAMERA_PITCH_DEGREES = 5.0;    // camera upward tilt
@@ -48,8 +46,9 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
     public static final double TURRET_RIGHT = 0.88;
     public static final double TURRET_LEFT = 0.68;
     public static final double TURRET_CENTER = 0.778;
-    public static final double KICKER_DOWN = 0.9;//0.225
-    public static final double KICKER_UP = 0.53;//0.6
+    public static final double KICKER_DOWN = 0.73;//0.225
+    public static final double KICKER_UP = 0.36;//0.6
+    public static final double KICKER_MIDDLE = 0.53;
     public static final double ARM_SERVO_POSITION = 0.042;
     public static final double INTAKE_IDLE = -0.1;
     public static final double BOOTKICKER_IDLE = -0.1;//-0.1
@@ -113,6 +112,7 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
     double newPos;
     boolean gamepad1LastA = false;
     boolean aPressed = false;
+    boolean bumperPressed = false;
     int ballsShot = 0;
 
     @Override
@@ -149,12 +149,8 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
         telemetry.addData("f: ",f);//0
         telemetry.update();
 
-
-
-
         limelight.pipelineSwitch(0); // AprilTag pipeline
         limelight.start();
-
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
@@ -172,7 +168,6 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
 
         while (opModeIsActive()) {
             armservo.setPosition(ARM_SERVO_POSITION);
-
             pinpointLocalizer.update();
             boolean options = gamepad1.options;
             if (options && !lastOptions) {
@@ -183,9 +178,9 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
             double distanceCM = distanceSensor.getDistance(DistanceUnit.CM);
 
             // DRIVETRAIN
-            double y  = -gamepad1.left_stick_y / 1.5;
-            double x  =  gamepad1.left_stick_x / 1.5;
-            double rx =  gamepad1.right_stick_x / 1.5;
+            double y  = -gamepad1.left_stick_y;
+            double x  =  gamepad1.left_stick_x;
+            double rx =  gamepad1.right_stick_x;
             double heading = pinpointLocalizer.getHeading();
             double rotX = x * Math.cos(-heading) - y * Math.sin(-heading);
             double rotY = x * Math.sin(-heading) + y * Math.cos(-heading);
@@ -221,17 +216,14 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
             if (result != null && result.isValid() && result.getTx() != tx) {
                 int detectedID = result.getFiducialResults().get(0).getFiducialId();
                 telemetry.addData("sees april tag, this is detectedid: ", detectedID);
-                //telemetry.update();
                 tx = result.getTx();
                 if (detectedID == 20) {
                     double val = Math.min(Math.max(TURRET_LEFT, turrpos + (tx / 360)-0.005), TURRET_RIGHT);
                     turret.setPosition(val);
-                    //sleep(900);
                     telemetry.addData("servo target pos blue", val );
                 } else if (detectedID == 24) {
                     double val = Math.min(Math.max(TURRET_LEFT, turrpos + (tx / 360)+0.005), TURRET_RIGHT);
                     turret.setPosition(val);
-                    //sleep(900);
                     telemetry.addData("servo target pos red", val );
                 }
             }
@@ -251,20 +243,21 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
                     currentState = RobotState.IDLE;
                 } else {
                     currentState = RobotState.SHOOT;
-
-
                 }
             }
             if(xPressed) {
                 currentState = RobotState.ABORT;
             }
-//            if (gamepad2.right_bumper){
-//                turret.setPosition(TURRET_CENTER);
-//            }
+            if (gamepad1.right_bumper && !bumperPressed){
+                turret.setPosition(TURRET_CENTER);
+                bumperPressed = true;
+            }
+            else {
+                bumperPressed = false;
+            }
+
             lastA = a;
             lastB = b;
-
-
             // STATE MACHINE
             switch (currentState) {
                 case IDLE:
@@ -275,7 +268,7 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
                     break;
                 case COLLECT:
                     if (distanceCM<7){
-                        kicker.setPosition(0.7);
+                        kicker.setPosition(KICKER_MIDDLE);
                         kickerPartial = true;
                     }
                     shooter.setVelocity(shooterVelocity(distanceInches));
@@ -297,10 +290,9 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
                         runtime.reset();
                         kickerStage = 1;
                         kickerPartial = false;
-
                     }
 // delay 100ms
-                    if (kickerStage == 1 && runtime.milliseconds() >= 100 ) {
+                    if (kickerStage == 1 && runtime.milliseconds() >= 100) {
                         kicker.setPosition(KICKER_UP);
                         runtime.reset();
                         kickerStage = 2;
@@ -352,17 +344,13 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
             dashboardTelemetry.addData("LeftBack Power",leftBack.getCurrent(CurrentUnit.AMPS));
             dashboardTelemetry.addData("RightFront Power",rightFront.getCurrent(CurrentUnit.AMPS));
             dashboardTelemetry.addData("RightBack Power",rightBack.getCurrent(CurrentUnit.AMPS));
-
-            //  telemetry.addData("Distance (in)", "%.1f", distanceInches);
             telemetry.update();
         }
     }
-
     public double shooterVelocity(double distanceInInches) {
         if (distanceInInches>=range1.l && distanceInInches<range1.r){
             telemetry.addData("range1", range1.speed);
             return range1.speed;
-
         }
         else if (distanceInInches>=range2.l && distanceInInches<range2.r){
             telemetry.addData("range2", range2.speed);
@@ -377,15 +365,4 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
             return range4.speed;
         }
     }
-
 }
-//class Range {
-//    double l;
-//    double r;
-//    double speed;
-//    Range(double l, double r, double speed) {
-//        this.l = l;
-//        this.r = r;
-//        this.speed = speed;
-//    }
-//}
