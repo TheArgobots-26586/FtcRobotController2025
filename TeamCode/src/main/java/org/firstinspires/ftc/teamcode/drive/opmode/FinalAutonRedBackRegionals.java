@@ -20,8 +20,8 @@ import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
-@Autonomous(name = "FinalAutonRedFront", group = "Robot")
-public class FinalAutonRedFront extends LinearOpMode {
+@Autonomous(name = "FinalAutonRedBackRegionals", group = "Robot")
+public class FinalAutonRedBackRegionals extends LinearOpMode {
 
     private DcMotor intake = null;
     private Servo rotator = null;
@@ -35,8 +35,11 @@ public class FinalAutonRedFront extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     private RevColorSensorV3 distanceSensor;
-    public static final double KICKER_DOWN = 0.4;
-    public static final double KICKER_UP = 0.9;
+    public static final double TURRET_LEFT_POS= 0.68;
+    public static final double TURRET_RIGHT_POS = 0.88;
+    public static final double TURRET_CENTER = 0.778;
+    public static final double KICKER_DOWN = 0.9;//0.225
+    public static final double KICKER_UP = 0.53;
     public static final double ARM_SERVO_POSITION = 0.24;
     public static final double INTAKE_IDLE = -0.1;
     public static final double BOOTKICKER_IDLE = -0.1;
@@ -45,7 +48,7 @@ public class FinalAutonRedFront extends LinearOpMode {
     public static final double INTAKE_SHOOT = -0.2;
     public static final double BOOTKICKER_SHOOT = -0.2;
     public static final double MAX_COLOR_SENSED_DISTANCE = 7;
-    String position = "RedFront";
+    String position = "RedBack";
     double heading;
     private Servo turret;
 
@@ -78,36 +81,34 @@ public class FinalAutonRedFront extends LinearOpMode {
 
         Pose2d startPose;
         if (position.equals("RedBack")) {
-            startPose = new Pose2d(-54, -12, Math.toRadians(0));
+            startPose = new Pose2d(60, 12, Math.toRadians(180));
         } else if (position.equals("BlueBack")) {
             startPose = new Pose2d(60, -12, Math.toRadians(180));
         } else if (position.equals("BlueFront")) {
-            startPose = new Pose2d(-54, -47.5, Math.toRadians(225));
+            startPose = new Pose2d(49, 49, Math.toRadians(45));
         } else {
-            startPose = new Pose2d(-54, 47.5, Math.toRadians(135));
+            startPose = new Pose2d(49, -49, Math.toRadians(-45));
         }
-        kicker.setPosition(0.225);
+        kicker.setPosition(KICKER_DOWN);
 
         TrajectorySequence traj21BlueFront = drive.trajectorySequenceBuilder(startPose)
-
                 .addTemporalMarker(() -> {
-                    shooter.setVelocity(1100);
+                    shooter.setVelocity(1415);
                 })
-                .back(40)
                 .addTemporalMarker(() -> {
                     LLResult result = limelight.getLatestResult();
                     if (result != null && result.isValid()) {
                         telemetry.addData("Apriltags", tx);
                         tx = result.getTx();
                         ty = result.getTy();
-                        double val = Math.min(Math.max(0.8, turret.getPosition() + (tx / 360)), 1);
-                        turret.setPosition(val-0.003);
+                        double val = Math.min(Math.max(TURRET_LEFT_POS, turret.getPosition() + (tx / 360)), TURRET_RIGHT_POS);
+                        turret.setPosition(val +0.004);
                         telemetry.addData("servo target pos", val);
                         telemetry.update();
                     }
 
                 })
-                .waitSeconds(2)
+                .waitSeconds(3.25)
                 .addTemporalMarker(() -> {
                     telemetry.addData("Kicker code","");
                     telemetry.update();
@@ -119,7 +120,7 @@ public class FinalAutonRedFront extends LinearOpMode {
                 .waitSeconds(0.6)
                 .addTemporalMarker(() -> armservo.setPosition(ARM_SERVO_POSITION+0.005))
                 .addTemporalMarker(() -> intake.setPower(INTAKE_COLLECT))
-                .addTemporalMarker(() -> bootkicker.setPower(BOOTKICKER_COLLECT-0.2))
+                .addTemporalMarker(() -> bootkicker.setPower(BOOTKICKER_COLLECT))
                 .waitSeconds(1)
                 .addTemporalMarker(() -> {
                     if (distanceSensor.getDistance(DistanceUnit.CM) < 7.5) {
@@ -128,7 +129,7 @@ public class FinalAutonRedFront extends LinearOpMode {
                 })
                 .waitSeconds(0.7)
                 .addTemporalMarker(() -> kicker.setPosition(KICKER_DOWN))
-                .waitSeconds(1.6)
+                .waitSeconds(1.4)
                 .addTemporalMarker(() -> {
                     if (distanceSensor.getDistance(DistanceUnit.CM) < 7.5) {
                         kicker.setPosition(KICKER_UP);
@@ -136,14 +137,14 @@ public class FinalAutonRedFront extends LinearOpMode {
                 })
                 .waitSeconds(0.6)
                 .addTemporalMarker(() -> kicker.setPosition(KICKER_DOWN))
-                .lineToLinearHeading(new Pose2d(-7.75, 35, Math.toRadians(100)))//-230
+                .lineToLinearHeading(new Pose2d(30, 30, Math.toRadians(90)))
                 .forward(25,
                         SampleMecanumDrive.getVelocityConstraint(20, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(10)
                 )
                 .addTemporalMarker(() -> intake.setPower(INTAKE_IDLE))
                 .addTemporalMarker(() -> bootkicker.setPower(0))
-                .lineToLinearHeading(new Pose2d(-14, 14, Math.toRadians(135)))
+                .lineToLinearHeading(new Pose2d(60, 12, Math.toRadians(-190)))
                 .addTemporalMarker(() -> {
                     LLResult result = limelight.getLatestResult();
                     if (result != null && result.isValid()) {
@@ -151,7 +152,7 @@ public class FinalAutonRedFront extends LinearOpMode {
                         tx = result.getTx();
                         ty = result.getTy();
                         double val = Math.min(Math.max(0.8, turret.getPosition() + (tx / 360)), 1);
-                        turret.setPosition(val);
+                        turret.setPosition(val+0.004);
                         telemetry.addData("servo target pos", val);
                         telemetry.update();
                     }
@@ -167,7 +168,7 @@ public class FinalAutonRedFront extends LinearOpMode {
                 .waitSeconds(0.6)
                 .addTemporalMarker(() -> kicker.setPosition(KICKER_DOWN))
                 .waitSeconds(1)
-                .addTemporalMarker(() -> armservo.setPosition(ARM_SERVO_POSITION+0.006))
+                .addTemporalMarker(() -> armservo.setPosition(ARM_SERVO_POSITION+0.005))
                 .addTemporalMarker(() -> intake.setPower(-0.7))//changed value
                 .addTemporalMarker(() -> bootkicker.setPower(BOOTKICKER_COLLECT))
                 .waitSeconds(1.5)
@@ -186,7 +187,7 @@ public class FinalAutonRedFront extends LinearOpMode {
 
                 })
                 .waitSeconds(0.6)
-                .strafeRight(25)
+                .forward(22)
                 .build();
 
 
@@ -195,8 +196,8 @@ public class FinalAutonRedFront extends LinearOpMode {
 
         drive.setPoseEstimate(startPose);
 
-        kicker.setPosition(0.225);
-        turret.setPosition(0.9);
+        kicker.setPosition(KICKER_DOWN);
+        turret.setPosition(TURRET_CENTER);
         runtime.reset();
 
         drive.followTrajectorySequence(traj21BlueFront);

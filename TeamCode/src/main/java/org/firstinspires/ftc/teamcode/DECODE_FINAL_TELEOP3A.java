@@ -49,7 +49,7 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
     public static final double KICKER_DOWN = 0.73;//0.225
     public static final double KICKER_UP = 0.36;//0.6
     public static final double KICKER_MIDDLE = 0.53;
-    public static final double ARM_SERVO_POSITION = 0.042;
+    public static final double ARM_SERVO_POSITION = 0.045;//0.043
     public static final double INTAKE_IDLE = -0.1;
     public static final double BOOTKICKER_IDLE = -0.1;//-0.1
     public static final double INTAKE_COLLECT = -0.9;
@@ -72,11 +72,12 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
     private DcMotorEx bootkicker;
 
     private ElapsedTime runtime = new ElapsedTime();
+    private ElapsedTime intakeRuntime = new ElapsedTime();
     private RevColorSensorV3 distanceSensor;
     private PinpointLocalizer pinpointLocalizer;
 
-    Range range1 = new Range(0, 55, 1630);//1100
-    Range range2 = new Range(55, 73, 1800);//1200
+    Range range1 = new Range(0, 55, 1610);//1100
+    Range range2 = new Range(55, 73, 1860);//1200
     //Range range3 = new Range(73,85,)
 
     Range range3 = new Range(112, Integer.MAX_VALUE, 2140);//1430
@@ -162,12 +163,13 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         pinpointLocalizer = new PinpointLocalizer(hardwareMap);
-
+        armservo.setPosition(ARM_SERVO_POSITION);
+        double offset;
 
         waitForStart();
 
         while (opModeIsActive()) {
-            armservo.setPosition(ARM_SERVO_POSITION);
+           // armservo.setPosition(ARM_SERVO_POSITION);
             pinpointLocalizer.update();
             boolean options = gamepad1.options;
             if (options && !lastOptions) {
@@ -184,6 +186,8 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
             double heading = pinpointLocalizer.getHeading();
             double rotX = x * Math.cos(-heading) - y * Math.sin(-heading);
             double rotY = x * Math.sin(-heading) + y * Math.cos(-heading);
+
+
 
             double denom = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
             leftFront.setPower((rotY + rotX + rx) / denom);
@@ -207,6 +211,7 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
                         Math.tan(Math.toRadians(totalVerticalAngle));
                 //telemetry.addData("Tag Seen", true);
             }
+
             gamepad1LastA = aPressed;
             // A(Toggle for IDLE and COLLECT) B(Toggle for SHOOT and IDLE)
             boolean a = gamepad2.a;
@@ -217,16 +222,23 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
                 int detectedID = result.getFiducialResults().get(0).getFiducialId();
                 telemetry.addData("sees april tag, this is detectedid: ", detectedID);
                 tx = result.getTx();
+                double val = 0;
                 if (detectedID == 20) {
-                    double val = Math.min(Math.max(TURRET_LEFT, turrpos + (tx / 360)-0.005), TURRET_RIGHT);
+                    val = Math.min(Math.max(TURRET_LEFT, turrpos + (tx / 360)-0.005), TURRET_RIGHT);
                     turret.setPosition(val);
                     telemetry.addData("servo target pos blue", val );
                 } else if (detectedID == 24) {
-                    double val = Math.min(Math.max(TURRET_LEFT, turrpos + (tx / 360)+0.005), TURRET_RIGHT);
+                    val = Math.min(Math.max(TURRET_LEFT, turrpos + (tx / 360)+0.005), TURRET_RIGHT);
                     turret.setPosition(val);
                     telemetry.addData("servo target pos red", val );
                 }
+//                double angle = (val - TURRET_CENTER) * 360;
+//                offset = Math.asin((12 * Math.sqrt(2) * Math.sin(Math.toRadians(angle-45)))/distanceInches);
+//                offset = Math.toDegrees(offset)/360;
+//                turret.setPosition(val + offset);
+//                telemetry.addData("offset: ", offset);
             }
+
 
             if (a && !lastA) {
                 if (currentState == RobotState.COLLECT) {
@@ -267,10 +279,24 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
                     armservo.setPosition(ARM_SERVO_POSITION);
                     break;
                 case COLLECT:
+                    intakeRuntime.reset();
                     if (distanceCM<7){
                         kicker.setPosition(KICKER_MIDDLE);
                         kickerPartial = true;
                     }
+                    //logic 1
+//                    if (runtime.milliseconds()>500){
+//                        armservo.setPosition(0.085 - armservo.getPosition());
+//                        runtime.reset();
+//                    }
+                    //logic 2
+//                    if (intakeRuntime.milliseconds()%1000< 500){
+//                        armservo.setPosition(0.043);
+//                    }
+//                    else {
+//                        armservo.setPosition(0.042);
+//                    }
+
                     shooter.setVelocity(shooterVelocity(distanceInches));
                     bootkicker.setPower(BOOTKICKER_COLLECT);
                     intake.setPower(INTAKE_COLLECT);
@@ -298,7 +324,7 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
                         kickerStage = 2;
                     }
 // delay 500ms
-                    if (kickerStage == 2 && runtime.milliseconds() >= 500) {
+                    if (kickerStage == 2 && runtime.milliseconds() >= 400) {//500
                         kicker.setPosition(KICKER_DOWN);
                         runtime.reset();
                         kickerStage = 3;
@@ -344,9 +370,14 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
             dashboardTelemetry.addData("LeftBack Power",leftBack.getCurrent(CurrentUnit.AMPS));
             dashboardTelemetry.addData("RightFront Power",rightFront.getCurrent(CurrentUnit.AMPS));
             dashboardTelemetry.addData("RightBack Power",rightBack.getCurrent(CurrentUnit.AMPS));
+
+            dashboardTelemetry.addData("Shooter Current",shooter.getCurrent(CurrentUnit.AMPS));
+            dashboardTelemetry.addData("Shooter Velocity",shooter.getVelocity());
             telemetry.update();
+            dashboardTelemetry.update();
         }
     }
+
     public double shooterVelocity(double distanceInInches) {
         if (distanceInInches>=range1.l && distanceInInches<range1.r){
             telemetry.addData("range1", range1.speed);
