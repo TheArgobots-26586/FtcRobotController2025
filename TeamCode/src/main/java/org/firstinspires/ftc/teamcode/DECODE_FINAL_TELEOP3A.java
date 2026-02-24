@@ -49,14 +49,14 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
     public static final double KICKER_DOWN = 0.73;//0.225
     public static final double KICKER_UP = 0.36;//0.6
     public static final double KICKER_MIDDLE = 0.53;
-    public static final double ARM_SERVO_POSITION = 0.045;//0.043
+    public static final double ARM_SERVO_POSITION = 0.175;//0.043 //0.045
     public static final double INTAKE_IDLE = -0.1;
     public static final double BOOTKICKER_IDLE = -0.1;//-0.1
     public static final double INTAKE_COLLECT = -0.9;
     public static final double BOOTKICKER_COLLECT = -0.4;//-0.4
     public static final double INTAKE_ABORT = 0.5;
     public static final double BOOTKICKER_ABORT = 0.5;
-    public static final double ARM_ABORT = 0.05;
+    public static final double ARM_ABORT = 0.2;
     public static final double INTAKE_SHOOT = -0.2;
     public static final double BOOTKICKER_SHOOT = -0.8;
     public static final double MAX_COLOR_SENSED_DISTANCE = 7;
@@ -323,7 +323,7 @@ public class DECODE_FINAL_TELEOP3A extends LinearOpMode {
                         runtime.reset();
                         kickerStage = 2;
                     }
-// delay 500ms
+// delay 400ms
                     if (kickerStage == 2 && runtime.milliseconds() >= 400) {//500
                         kicker.setPosition(KICKER_DOWN);
                         runtime.reset();
