@@ -39,9 +39,9 @@ public class FinalDecodeSideRedRegionals extends LinearOpMode {
     public static final double TURRET_RIGHT_POS = 0.88;
 
     public static final double TURRET_CENTER = 0.778;
-    public static final double KICKER_DOWN = 0.9;//0.225
-    public static final double KICKER_UP = 0.53;
-    public static final double ARM_SERVO_POSITION = 0.24;
+    public static final double KICKER_DOWN = 0.73;//0.225
+    public static final double KICKER_UP = 0.36;
+    public static final double ARM_SERVO_POSITION = 0.175;
     public static final double INTAKE_IDLE = -0.1;
     public static final double BOOTKICKER_IDLE = -0.1;
     public static final double INTAKE_COLLECT = -0.9;
@@ -92,8 +92,8 @@ public class FinalDecodeSideRedRegionals extends LinearOpMode {
         kicker.setPosition(KICKER_DOWN);
         TrajectorySequence traj21BlueFront = drive.trajectorySequenceBuilder(startPose)
                 .addTemporalMarker(() -> {
-                    shooter.setVelocity(1435);
-                    turret.setPosition(0.9);
+                    shooter.setVelocity(2115);
+                    turret.setPosition(0.778);
                     telemetry.addData("turret", turret.getPosition());
                     telemetry.update();
                 })
@@ -105,7 +105,7 @@ public class FinalDecodeSideRedRegionals extends LinearOpMode {
                         telemetry.addData("April Tags", tx);
                         tx = result.getTx();
                         ty = result.getTy();
-                        double val = Math.min(Math.max(TURRET_LEFT_POS, turret.getPosition() + (tx / 360)), TURRET_RIGHT_POS);
+                        double val = Math.min(Math.max(TURRET_LEFT_POS, turret.getPosition() + (tx / 450)), TURRET_RIGHT_POS);
                         turret.setPosition(val);
                         telemetry.addData("servo target pos", val);
                         telemetry.update();
