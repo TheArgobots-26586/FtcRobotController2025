@@ -38,9 +38,9 @@ public class FinalAutonRedFrontRegionals extends LinearOpMode {
     public static final double TURRET_LEFT_POS= 0.68;
     public static final double TURRET_RIGHT_POS = 0.88;
     public static final double TURRET_CENTER = 0.778;
-    public static final double KICKER_DOWN = 0.9;//0.225
-    public static final double KICKER_UP = 0.53;
-    public static final double ARM_SERVO_POSITION = 0.24;
+    public static final double KICKER_DOWN = 0.73;//0.225
+    public static final double KICKER_UP = 0.36;
+    public static final double ARM_SERVO_POSITION = 0.175;
     public static final double INTAKE_IDLE = -0.1;
     public static final double BOOTKICKER_IDLE = -0.1;
     public static final double INTAKE_COLLECT = -0.9;
@@ -76,8 +76,8 @@ public class FinalAutonRedFrontRegionals extends LinearOpMode {
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        TrajectoryVelocityConstraint slowVel = SampleMecanumDrive.getVelocityConstraint(10, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH);
-        TrajectoryAccelerationConstraint slowAccel = SampleMecanumDrive.getAccelerationConstraint(10);
+        TrajectoryVelocityConstraint slowVel = SampleMecanumDrive.getVelocityConstraint(20, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH);
+        TrajectoryAccelerationConstraint slowAccel = SampleMecanumDrive.getAccelerationConstraint(20);
 
         Pose2d startPose;
         if (position.equals("RedBack")) {
@@ -94,7 +94,7 @@ public class FinalAutonRedFrontRegionals extends LinearOpMode {
         TrajectorySequence traj21BlueFront = drive.trajectorySequenceBuilder(startPose)
 
                 .addTemporalMarker(() -> {
-                    shooter.setVelocity(1100);
+                    shooter.setVelocity(1680);
                 })
                 .back(40)
                 .addTemporalMarker(() -> {
@@ -103,7 +103,7 @@ public class FinalAutonRedFrontRegionals extends LinearOpMode {
                         telemetry.addData("Apriltags", tx);
                         tx = result.getTx();
                         ty = result.getTy();
-                        double val = Math.min(Math.max(TURRET_LEFT_POS, turret.getPosition() + (tx / 360)), TURRET_RIGHT_POS);
+                        double val = Math.min(Math.max(TURRET_LEFT_POS, turret.getPosition() + (tx / 450)), TURRET_RIGHT_POS);
                         turret.setPosition(val-0.003);
                         telemetry.addData("servo target pos", val);
                         telemetry.update();
@@ -139,10 +139,10 @@ public class FinalAutonRedFrontRegionals extends LinearOpMode {
                 })
                 .waitSeconds(0.6)
                 .addTemporalMarker(() -> kicker.setPosition(KICKER_DOWN))
-                .lineToLinearHeading(new Pose2d(-7.75, 35, Math.toRadians(100)))//-230
-                .forward(25,
+                .lineToLinearHeading(new Pose2d(-2, 30, Math.toRadians(115)))//-230
+                .forward(30,
                         SampleMecanumDrive.getVelocityConstraint(20, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(10)
+                        SampleMecanumDrive.getAccelerationConstraint(20)
                 )
                 .addTemporalMarker(() -> intake.setPower(INTAKE_IDLE))
                 .addTemporalMarker(() -> bootkicker.setPower(0))
@@ -153,7 +153,7 @@ public class FinalAutonRedFrontRegionals extends LinearOpMode {
                         telemetry.addData("Apriltags", tx);
                         tx = result.getTx();
                         ty = result.getTy();
-                        double val = Math.min(Math.max(TURRET_LEFT_POS, turret.getPosition() + (tx / 360)), TURRET_RIGHT_POS);
+                        double val = Math.min(Math.max(TURRET_LEFT_POS, turret.getPosition() + (tx / 450)), TURRET_RIGHT_POS);
                         turret.setPosition(val);
                         telemetry.addData("servo target pos", val);
                         telemetry.update();

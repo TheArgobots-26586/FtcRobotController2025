@@ -35,18 +35,22 @@ public class FinalDecodeSideBlueRegionals extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     private RevColorSensorV3 distanceSensor;
-    public static final double TURRET_LEFT_POS= 0.68;
     public static final double TURRET_RIGHT_POS = 0.88;
-    public static final double TURRET_CENTER = 0.778;//0.225
-    public static final double KICKER_DOWN = 0.73;//0.225
-    public static final double KICKER_UP = 0.36;
-    public static final double ARM_SERVO_POSITION = 0.175;
+    public static final double TURRET_LEFT_POS = 0.68;
+    public static final double TURRET_CENTER = 0.778;
+    public static final double KICKER_DOWN = 0.71;//0.225
+    public static final double KICKER_UP = 0.374;//0.6
+    public static final double KICKER_MIDDLE = 0.53;
+    public static final double ARM_SERVO_POSITION = 0.175;//0.043 //0.045
     public static final double INTAKE_IDLE = -0.1;
-    public static final double BOOTKICKER_IDLE = -0.1;
+    public static final double BOOTKICKER_IDLE = -0.1;//-0.1
     public static final double INTAKE_COLLECT = -0.9;
-    public static final double BOOTKICKER_COLLECT = -0.4;
+    public static final double BOOTKICKER_COLLECT = -0.4;//-0.4
+    public static final double INTAKE_ABORT = 0.5;
+    public static final double BOOTKICKER_ABORT = 0.5;
+    public static final double ARM_ABORT = 0.2;
     public static final double INTAKE_SHOOT = -0.2;
-    public static final double BOOTKICKER_SHOOT = -0.2;
+    public static final double BOOTKICKER_SHOOT = -0.8;
     public static final double MAX_COLOR_SENSED_DISTANCE = 7;
     String position = "RedBack";
     double heading;

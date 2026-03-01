@@ -9,18 +9,15 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 
-
-@TeleOp(name="DECODE_FINAL_TELEOP3ARED_REGIONALS", group="Robot")
-public class DECODE_FINAL_TELEOP3ARED extends LinearOpMode {
+@TeleOp(name="DECODE_FINAL_TELEOP5", group="Robot")
+public class DECODE_FINAL_TELEOP5 extends LinearOpMode {
 
 /*================CONTROLS================
 
@@ -31,34 +28,41 @@ public class DECODE_FINAL_TELEOP3ARED extends LinearOpMode {
 
 ==========================================*/
 
+
+// CAMERA CODE INITIALIZATION FOR APRIL TAG and TURRET SERV0 ALIGNMENT IS BELOW
+
     private static final double CAMERA_HEIGHT_INCHES = 12.9;   // camera lens height
     private static final double TAG_HEIGHT_INCHES    = 29.5;   // AprilTag center height
     private static final double CAMERA_PITCH_DEGREES = 5.0;    // camera upward tilt
+    private static final double SERVO_CENTER = 0.9;
 
+    // Servo position that points the mechanism straight ahead (aligned with robot center)
+    private static final double SERVO_MIN = 0.8;
 
+    // Lowest safe servo position to prevent hitting the robot or hard stops
+    private static final double SERVO_MAX = 1;
+
+    // Highest safe servo position to prevent hitting the robot or hard stops
+    private static final double SERVO_GAIN = 0.005;
+
+    // How much the servo moves per degree of horizontal error (tx); higher = faster movement
     private static final double TX_DEADBAND = 4.0;
-    private AnalogInput turretinput;
-    double MAXV = 0.47,MINV = 2.79;
-    int kickerStage = 0;
+
     double distanceInches = 0;
 
     //================CONSTANTS================//
-    public static final double TURRET_RIGHT = 0.93;//0.88
-    public static final double TURRET_LEFT = 0.63;//0.68
-    public static final double TURRET_CENTER = 0.778;
-    public static final double KICKER_DOWN = 0.71;//0.225
-    public static final double KICKER_UP = 0.374;//0.6
-    public static final double KICKER_MIDDLE = 0.53;
-    public static final double ARM_SERVO_POSITION = 0.175;//0.043 //0.045
+    public static final double KICKER_DOWN = 0.9;//0.225
+    public static final double KICKER_UP = 0.53;//0.6
+    public static final double ARM_SERVO_POSITION = 0.245;
     public static final double INTAKE_IDLE = -0.1;
-    public static final double BOOTKICKER_IDLE = -0.1;//-0.1
+    public static final double BOOTKICKER_IDLE = -0.1;
     public static final double INTAKE_COLLECT = -0.9;
-    public static final double BOOTKICKER_COLLECT = -0.4;//-0.4
+    public static final double BOOTKICKER_COLLECT = -0.4;
     public static final double INTAKE_ABORT = 0.5;
     public static final double BOOTKICKER_ABORT = 0.5;
-    public static final double ARM_ABORT = 0.2;
+    public static final double ARM_ABORT = 0.3;
     public static final double INTAKE_SHOOT = -0.2;
-    public static final double BOOTKICKER_SHOOT = -0.8;
+    public static final double BOOTKICKER_SHOOT = -0.2;
     public static final double MAX_COLOR_SENSED_DISTANCE = 7;
 
 
@@ -66,23 +70,18 @@ public class DECODE_FINAL_TELEOP3ARED extends LinearOpMode {
 
     private Limelight3A limelight;
     private DcMotorEx intake;
-    private DcMotorEx leftFront, leftBack, rightFront, rightBack;
+    private DcMotor leftFront, leftBack, rightFront, rightBack;
     private DcMotorEx shooter;
     private Servo kicker;
-    private DcMotorEx bootkicker;
-
-    private ElapsedTime runtime = new ElapsedTime();
-    private ElapsedTime intakeRuntime = new ElapsedTime();
+    private DcMotor bootkicker;
     private RevColorSensorV3 distanceSensor;
     private PinpointLocalizer pinpointLocalizer;
 
-    Range range1 = new Range(0, 55, 1610);//1100
-    Range range2 = new Range(55, 73, 1860);//1200
-    //Range range3 = new Range(73,85,)
+    Range range1 = new Range(0, 55, 1100);
+    Range range2 = new Range(55, 80, 1200);
 
-    Range range3 = new Range(112, Integer.MAX_VALUE, 2200);//1430
-    Range range4 = new Range(73, 112, 2170);//1410
-
+    Range range4 = new Range(112, Integer.MAX_VALUE, 1430);
+    Range range3 = new Range(80, 112, 1410);
 
     //STATE MACHINE SETUP
     enum RobotState {
@@ -91,85 +90,66 @@ public class DECODE_FINAL_TELEOP3ARED extends LinearOpMode {
         SHOOT,
         ABORT
     }
-    enum kickerState{
-        Stage1,
-        Stage2,
-        Stage3,
-        Stage4
-    }
+
     RobotState currentState = RobotState.IDLE;
 
     boolean lastA = false;
     boolean lastB = false;
 
     // Latch for auto-fire
+    boolean firingEnabled = false;
     boolean lastOptions = false;
     private Servo turret = null;
     public Servo armservo = null;
     double tx=0;
     double ty=0;
-    int current_kicker_stage = 0;
-    boolean kickerPartial = false;
     double newPos;
     boolean gamepad1LastA = false;
     boolean aPressed = false;
-    boolean bumperPressed = false;
-    int ballsShot = 0;
+    private AnalogInput turretinput;
+    double MAXV = 0.47,MINV = 2.79;
 
     @Override
     public void runOpMode() {
-        Telemetry dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
         //HARDWARE MAP
+        Telemetry dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
         distanceSensor = hardwareMap.get(RevColorSensorV3.class, "sensor_color_distance");
-        leftFront  = hardwareMap.get(DcMotorEx.class, "LeftFront");
-        leftBack   = hardwareMap.get(DcMotorEx.class, "LeftBack");
-        rightFront = hardwareMap.get(DcMotorEx.class, "RightFront");
-        rightBack  = hardwareMap.get(DcMotorEx.class, "RightBack");
+        leftFront  = hardwareMap.get(DcMotor.class, "LeftFront");
+        leftBack   = hardwareMap.get(DcMotor.class, "LeftBack");
+        rightFront = hardwareMap.get(DcMotor.class, "RightFront");
+        rightBack  = hardwareMap.get(DcMotor.class, "RightBack");
 
         intake     = hardwareMap.get(DcMotorEx.class, "intake");
         kicker     = hardwareMap.get(Servo.class, "kicker");
         shooter    = hardwareMap.get(DcMotorEx.class, "shooter");
-        bootkicker = hardwareMap.get(DcMotorEx.class, "bootkicker");
+        bootkicker = hardwareMap.get(DcMotor.class, "bootkicker");
         armservo = hardwareMap.get(Servo.class, "armservo");
         turret = hardwareMap.get(Servo.class, "rotator");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         turretinput = hardwareMap.get(AnalogInput.class,"turretinput");
 
-        //PID Coefficients
-        PIDFCoefficients shooterCoefficients = shooter.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
-        double p = shooterCoefficients.p;
-        double i = shooterCoefficients.i;
-        double d = shooterCoefficients.d;
-        double f = shooterCoefficients.f;
-        PIDFCoefficients pidfNew = new PIDFCoefficients(14, i, d, f);
-        shooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
-
-        telemetry.addData("p: ",p);//10
-        telemetry.addData("i: ",i);//3
-        telemetry.addData("d: ",d);//0
-        telemetry.addData("f: ",f);//0
-        telemetry.update();
 
         limelight.pipelineSwitch(0); // AprilTag pipeline
         limelight.start();
+
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
 
         kicker.setPosition(KICKER_DOWN);
         armservo.setPosition(ARM_SERVO_POSITION);
-        turret.setPosition(TURRET_CENTER);
+        turret.setPosition(0.778);
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         pinpointLocalizer = new PinpointLocalizer(hardwareMap);
-        armservo.setPosition(ARM_SERVO_POSITION);
-        double offset;
+
 
         waitForStart();
 
         while (opModeIsActive()) {
-            // armservo.setPosition(ARM_SERVO_POSITION);
+            armservo.setPosition(ARM_SERVO_POSITION);
+
             pinpointLocalizer.update();
             boolean options = gamepad1.options;
             if (options && !lastOptions) {
@@ -180,20 +160,20 @@ public class DECODE_FINAL_TELEOP3ARED extends LinearOpMode {
             double distanceCM = distanceSensor.getDistance(DistanceUnit.CM);
 
             // DRIVETRAIN
-            double y  = -gamepad1.left_stick_y*0.825;
-            double x  =  gamepad1.left_stick_x/0.825;
-            double rx =  gamepad1.right_stick_x;
+            double y  = -gamepad1.left_stick_y / 1.5;
+            double x  =  gamepad1.left_stick_x / 1.5;
+            double rx =  gamepad1.right_stick_x / 1.5;
             double heading = pinpointLocalizer.getHeading();
             double rotX = x * Math.cos(-heading) - y * Math.sin(-heading);
             double rotY = x * Math.sin(-heading) + y * Math.cos(-heading);
-
-
 
             double denom = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
             leftFront.setPower((rotY + rotX + rx) / denom);
             leftBack.setPower((rotY - rotX + rx) / denom);
             rightFront.setPower((rotY - rotX - rx) / denom);
             rightBack.setPower((rotY + rotX - rx) / denom);
+
+            //distance mesuring
 
             // APRIL TAG DETECTION
             double curV = turretinput.getVoltage();
@@ -204,154 +184,132 @@ public class DECODE_FINAL_TELEOP3ARED extends LinearOpMode {
                 if(aPressed && !gamepad1LastA) {
                     gamepad1.rumble(100);
                 }
+
+                tx = result.getTx();
                 ty = result.getTy();
+
                 double totalVerticalAngle = CAMERA_PITCH_DEGREES + ty;
+
                 // Update the existing distanceInches variable (no 'double' prefix)
                 distanceInches = (TAG_HEIGHT_INCHES - CAMERA_HEIGHT_INCHES) /
                         Math.tan(Math.toRadians(totalVerticalAngle));
+
                 //telemetry.addData("Tag Seen", true);
             }
-
             gamepad1LastA = aPressed;
             // A(Toggle for IDLE and COLLECT) B(Toggle for SHOOT and IDLE)
+
             boolean a = gamepad2.a;
             boolean b = gamepad2.b;
             boolean xPressed = gamepad2.x;
 
-            if (result != null && result.isValid() && result.getTx() != tx) {
-                int detectedID = result.getFiducialResults().get(0).getFiducialId();
-                telemetry.addData("sees april tag, this is detectedid: ", detectedID);
-                tx = result.getTx();
-                double val = 0;
-//                if (detectedID == 20) {
-//                    // val = Math.min(Math.max(TURRET_LEFT, turrpos + (tx / 450)-0.005), TURRET_RIGHT);
-//                    val = Math.min(Math.max(TURRET_LEFT, turrpos + (tx / 450)-0.002), TURRET_RIGHT);
-//                    turret.setPosition(val);
-//                    telemetry.addData("servo target pos blue", val );
-//                }
-                if (detectedID == 24) {
-                    val = Math.min(Math.max(TURRET_LEFT, turrpos + (tx / 360)+0.005), TURRET_RIGHT);
-                    turret.setPosition(val);
-                    telemetry.addData("servo target pos red", val );
-                }
-//                double angle = (val - TURRET_CENTER) * 360;
-//                offset = Math.asin((12 * Math.sqrt(2) * Math.sin(Math.toRadians(angle-45)))/distanceInches);
-//                offset = Math.toDegrees(offset)/360;
-//                turret.setPosition(val + offset);
-//                telemetry.addData("offset: ", offset);
-            }
-
-
             if (a && !lastA) {
                 if (currentState == RobotState.COLLECT) {
                     currentState = RobotState.IDLE;
-                    ballsShot = 0;
+                    // tx = 0;
                 } else {
                     currentState = RobotState.COLLECT;
-                    ballsShot = 0;
+                    //  tx = 0;
                 }
             }
             if (b && !lastB) {
                 if (currentState == RobotState.SHOOT) {
-                    ballsShot = 0;
+
                     currentState = RobotState.IDLE;
+                    //   tx = 0;
                 } else {
                     currentState = RobotState.SHOOT;
+                    //   gamepad1.rumble(100);
+                    if (result != null && result.isValid()) {
+                        int detectedID = result.getFiducialResults().get(0).getFiducialId();
+
+                        if (detectedID == 20) {
+                            double val = Math.min(Math.max(0.68, turrpos + (tx / 360)), 0.88);
+                            turret.setPosition(val);
+                            sleep(900);
+                            telemetry.addData("servo target pos blue", val );
+                            telemetry.update();
+                        } else if (detectedID == 24) {
+                            double val = Math.min(Math.max(0.68, turrpos + (tx / 360)), 0.88);
+                            turret.setPosition(val);
+                            sleep(900);
+                            telemetry.addData("servo target pos red", val );
+                            telemetry.update();
+                        }
+
+
+//                        double val = Math.min(Math.max(0.8, turret.getPosition() + (tx / 360)), 1);
+//                        turret.setPosition(val);
+                        //  sleep(900);
+                        //  telemetry.addData("servo target pos", val);
+                        telemetry.update();
+                    }
+
                 }
             }
             if(xPressed) {
                 currentState = RobotState.ABORT;
             }
-            if (gamepad1.right_bumper && !bumperPressed){
-                turret.setPosition(TURRET_CENTER);
-                bumperPressed = true;
-            }
-            else {
-                bumperPressed = false;
-            }
-
             lastA = a;
             lastB = b;
+
+
             // STATE MACHINE
             switch (currentState) {
+
                 case IDLE:
-                    shooter.setVelocity(shooterVelocity(distanceInches));
-                    intake.setPower(INTAKE_IDLE);
-                    bootkicker.setPower(BOOTKICKER_IDLE);
-                    armservo.setPosition(ARM_SERVO_POSITION);
-                    break;
-                case COLLECT:
-                    intakeRuntime.reset();
-                    if (distanceCM<7){
-                        kicker.setPosition(KICKER_MIDDLE);
-                        kickerPartial = true;
-                    }
-                    //logic 1
-//                    if (runtime.milliseconds()>500){
-//                        armservo.setPosition(0.085 - armservo.getPosition());
-//                        runtime.reset();
-//                    }
-                    //logic 2
-//                    if (intakeRuntime.milliseconds()%1000< 500){
-//                        armservo.setPosition(0.043);
-//                    }
-//                    else {
-//                        armservo.setPosition(0.042);
-//                    }
 
                     shooter.setVelocity(shooterVelocity(distanceInches));
+                    intake.setPower(INTAKE_IDLE);
+                    turret.setPosition(0.778);
+                    bootkicker.setPower(BOOTKICKER_IDLE);
+                    kicker.setPosition(KICKER_DOWN);
+                    armservo.setPosition(0.24);
+                    break;
+
+                case COLLECT:
+                    shooter.setVelocity(shooterVelocity(distanceInches));
+                    kicker.setPosition(KICKER_DOWN);
                     bootkicker.setPower(BOOTKICKER_COLLECT);
                     intake.setPower(INTAKE_COLLECT);
-                    armservo.setPosition(ARM_SERVO_POSITION);
+                    turret.setPosition(0.778);
+                    armservo.setPosition(0.24);
                     break;
+
                 case SHOOT:
-                    if(ballsShot == 0) {
-                        intake.setPower(0);
-                        bootkicker.setPower(0);
-                    }
-                    else {
-                        intake.setPower(INTAKE_COLLECT-0.35);
-                        bootkicker.setPower(BOOTKICKER_COLLECT-0.05);
-                    }
                     shooter.setVelocity(shooterVelocity(distanceInches));
-                    if ((distanceCM < 7 && kickerStage == 0) || kickerPartial) {
-                        runtime.reset();
-                        kickerStage = 1;
-                        kickerPartial = false;
-                    }
-// delay 100ms
-                    if (kickerStage == 1 && runtime.milliseconds() >= 100) {
+                    // auto-fire while balls exist
+                    if (distanceCM < 7) {
+                        sleep(100);
                         kicker.setPosition(KICKER_UP);
-                        runtime.reset();
-                        kickerStage = 2;
-                    }
-// delay 400ms
-                    if (kickerStage == 2 && runtime.milliseconds() >= 500) {//500
+                        sleep(500);
                         kicker.setPosition(KICKER_DOWN);
-                        runtime.reset();
-                        kickerStage = 3;
-                    }
-// delay 200ms
-                    if (kickerStage == 3 && runtime.milliseconds() >= 200) {
+                        sleep(200);
                         telemetry.addData("kicker shoot", true);
-                        ballsShot++;
-                        kickerStage = 0;
+                        telemetry.update();
                     }
                     // stop when no ball
                     if (distanceCM >= 7) {
-                        armservo.setPosition(ARM_SERVO_POSITION+0.005);
+                        kicker.setPosition(KICKER_DOWN);
+                        armservo.setPosition(0.25);
                     }
+
+                    intake.setPower(INTAKE_COLLECT);
+                    bootkicker.setPower(BOOTKICKER_COLLECT);
                     telemetry.addData("shoot mode", true);
-                    //telemetry.update();
+                    telemetry.update();
                     break;
                 case ABORT:
                     intake.setPower(INTAKE_ABORT);
                     bootkicker.setPower(BOOTKICKER_ABORT);
                     armservo.setPosition(ARM_ABORT);
                     kicker.setPosition(KICKER_DOWN);
+                    turret.setPosition(0.778);
             }
 
             //telemetry
+            dashboardTelemetry.addData("intake Power",intake.getCurrent(CurrentUnit.AMPS));
+
             telemetry.addData("MODE", currentState);
             telemetry.addData("Distance (cm)", distanceCM);
             //  telemetry.addData("Current State is:", currentState);
@@ -361,29 +319,19 @@ public class DECODE_FINAL_TELEOP3ARED extends LinearOpMode {
             telemetry.addData("y:", pinpointLocalizer.getPoseEstimate().getY());
             telemetry.addData("heading:", pinpointLocalizer.getHeading());
             telemetry.addData("Distance From Goal:", distanceInches);
-            telemetry.addData("tx (deg)", result.getTx());
+            telemetry.addData("tx (deg)", tx);
             telemetry.addData("ty (deg)", ty);
             telemetry.addData("servo current pos", turret.getPosition());
             telemetry.addData("turret exact pose", turrpos);
-            telemetry.addData("kicker pos",kicker.getPosition());
-            dashboardTelemetry.addData("Boot Kicker Power",bootkicker.getCurrent(CurrentUnit.AMPS));
-            dashboardTelemetry.addData("Intake Power",intake.getCurrent(CurrentUnit.AMPS));
-            dashboardTelemetry.addData("LeftFront Power",leftFront.getCurrent(CurrentUnit.AMPS));
-            dashboardTelemetry.addData("LeftBack Power",leftBack.getCurrent(CurrentUnit.AMPS));
-            dashboardTelemetry.addData("RightFront Power",rightFront.getCurrent(CurrentUnit.AMPS));
-            dashboardTelemetry.addData("RightBack Power",rightBack.getCurrent(CurrentUnit.AMPS));
-
-            dashboardTelemetry.addData("Shooter Current",shooter.getCurrent(CurrentUnit.AMPS));
-            dashboardTelemetry.addData("Shooter Velocity",shooter.getVelocity());
+            //  telemetry.addData("Distance (in)", "%.1f", distanceInches);
             telemetry.update();
-            dashboardTelemetry.update();
         }
     }
-
     public double shooterVelocity(double distanceInInches) {
         if (distanceInInches>=range1.l && distanceInInches<range1.r){
             telemetry.addData("range1", range1.speed);
             return range1.speed;
+
         }
         else if (distanceInInches>=range2.l && distanceInInches<range2.r){
             telemetry.addData("range2", range2.speed);
@@ -398,4 +346,15 @@ public class DECODE_FINAL_TELEOP3ARED extends LinearOpMode {
             return range4.speed;
         }
     }
+
 }
+//class Range {
+//    double l;
+//    double r;
+//    double speed;
+//    Range(double l, double r, double speed) {
+//        this.l = l;
+//        this.r = r;
+//        this.speed = speed;
+//    }
+//}

@@ -5,7 +5,6 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -22,24 +21,27 @@ import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 @Disabled
-@Autonomous(name = "BlueBack", group = "Robot")
-public class BlueBack extends LinearOpMode {
+@Autonomous(name = "FinalAutonRedBackLoadingZone", group = "Robot")
+public class FinalAutonRedBackLoadingZone extends LinearOpMode {
 
     private DcMotor intake = null;
     private Servo rotator = null;
     private DcMotorEx shooter = null;
     private Servo kicker = null;
     private DcMotor bootkicker = null;
-    double tx = 0;
-    double ty = 0;
+    double tx=0;
+    double ty=0;
     private Servo armservo = null;
     private Limelight3A limelight;
 
     private ElapsedTime runtime = new ElapsedTime();
     private RevColorSensorV3 distanceSensor;
-    public static final double KICKER_DOWN = 0.225;
-    public static final double KICKER_UP = 0.6;
-    public static final double ARM_SERVO_POSITION = 0.24;
+    public static final double TURRET_LEFT_POS= 0.68;
+    public static final double TURRET_RIGHT_POS = 0.88;
+    public static final double TURRET_CENTER = 0.778;
+    public static final double KICKER_DOWN = 0.73;//0.225
+    public static final double KICKER_UP = 0.36;
+    public static final double ARM_SERVO_POSITION = 0.175;
     public static final double INTAKE_IDLE = -0.1;
     public static final double BOOTKICKER_IDLE = -0.1;
     public static final double INTAKE_COLLECT = -0.9;
@@ -47,9 +49,10 @@ public class BlueBack extends LinearOpMode {
     public static final double INTAKE_SHOOT = -0.2;
     public static final double BOOTKICKER_SHOOT = -0.2;
     public static final double MAX_COLOR_SENSED_DISTANCE = 7;
-    String position = "BlueBack";
+    String position = "RedBack";
     double heading;
     private Servo turret;
+
 
 
     @Override
@@ -79,62 +82,46 @@ public class BlueBack extends LinearOpMode {
 
         Pose2d startPose;
         if (position.equals("RedBack")) {
-            startPose = new Pose2d(-60, -12, Math.toRadians(0));
+            startPose = new Pose2d(60, 12, Math.toRadians(180));
         } else if (position.equals("BlueBack")) {
-            startPose = new Pose2d(-60, 12, Math.toRadians(0));
+            startPose = new Pose2d(60, -12, Math.toRadians(180));
         } else if (position.equals("BlueFront")) {
             startPose = new Pose2d(49, 49, Math.toRadians(45));
         } else {
             startPose = new Pose2d(49, -49, Math.toRadians(-45));
         }
-        kicker.setPosition(0.225);
+        kicker.setPosition(KICKER_DOWN);
+
         TrajectorySequence traj21BlueFront = drive.trajectorySequenceBuilder(startPose)
                 .addTemporalMarker(() -> {
-                    shooter.setVelocity(1400);
-                    turret.setPosition(0.9);//0.9
-                    telemetry.addData("turret", turret.getPosition());
-                    telemetry.update();
+                    shooter.setVelocity(2115);
                 })
-                .waitSeconds(1.0)
-
                 .addTemporalMarker(() -> {
                     LLResult result = limelight.getLatestResult();
                     if (result != null && result.isValid()) {
                         telemetry.addData("Apriltags", tx);
                         tx = result.getTx();
                         ty = result.getTy();
-                        double val = Math.min(Math.max(0.8, turret.getPosition() + (tx / 360)), 1);
-                        turret.setPosition(val);
+                        double val = Math.min(Math.max(TURRET_LEFT_POS, turret.getPosition() + (tx / 450)), TURRET_RIGHT_POS);
+                        turret.setPosition(val +0.004);
                         telemetry.addData("servo target pos", val);
                         telemetry.update();
                     }
 
                 })
-//                .addTemporalMarker(() -> {
-//                    LLResult result = limelight.getLatestResult();
-//                    if (result != null && result.isValid()) {
-//                        telemetry.addData("Apriltags", tx);
-//                        tx = result.getTx();
-//                        ty = result.getTy();
-//                        double val = Math.min(Math.max(0.8, turret.getPosition() + (tx / 360)), 1);
-//                        turret.setPosition(val);
-//                        telemetry.addData("servo target pos", val);
-//                        telemetry.update();
-//                    }
-//
-//                })
-
-                .waitSeconds(3.75)
+                .waitSeconds(3.25)
                 .addTemporalMarker(() -> {
+                    telemetry.addData("Kicker code","");
+                    telemetry.update();
                     kicker.setPosition(KICKER_UP);
 
                 })
-                .waitSeconds(0.7)
+                .waitSeconds(0.6)
                 .addTemporalMarker(() -> kicker.setPosition(KICKER_DOWN))
                 .waitSeconds(0.6)
-                .addTemporalMarker(() -> armservo.setPosition(ARM_SERVO_POSITION))
+                .addTemporalMarker(() -> armservo.setPosition(ARM_SERVO_POSITION+0.005))
                 .addTemporalMarker(() -> intake.setPower(INTAKE_COLLECT))
-                .addTemporalMarker(() -> bootkicker.setPower(-0.4))
+                .addTemporalMarker(() -> bootkicker.setPower(BOOTKICKER_COLLECT))
                 .waitSeconds(1)
                 .addTemporalMarker(() -> {
                     if (distanceSensor.getDistance(DistanceUnit.CM) < 7.5) {
@@ -143,86 +130,88 @@ public class BlueBack extends LinearOpMode {
                 })
                 .waitSeconds(0.7)
                 .addTemporalMarker(() -> kicker.setPosition(KICKER_DOWN))
-                .waitSeconds(1)
+                .waitSeconds(1.4)
                 .addTemporalMarker(() -> {
                     if (distanceSensor.getDistance(DistanceUnit.CM) < 7.5) {
                         kicker.setPosition(KICKER_UP);
                     }
                 })
+                .waitSeconds(0.6)
+                .addTemporalMarker(() -> kicker.setPosition(KICKER_DOWN))
 
-                //movements
-                .waitSeconds(0.7)
-                .addTemporalMarker(() -> kicker.setPosition(0.225))
-                .forward(27)
-                .turn(Math.toRadians(95))
-                .forward(31,
+                .lineToLinearHeading(new Pose2d(65, 50, Math.toRadians(90)))
+                .forward(25,
                         SampleMecanumDrive.getVelocityConstraint(20, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(10)
                 )
-                .back(29)
-                .turn(Math.toRadians(-95))
-                .back(20)
-                .waitSeconds(0.6)
+                .back(10)
+                .forward(10,
+                        SampleMecanumDrive.getVelocityConstraint(20, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(10)
+                )
+                .addTemporalMarker(() -> intake.setPower(INTAKE_IDLE))
+                .addTemporalMarker(() -> bootkicker.setPower(0))
+                .lineToLinearHeading(new Pose2d(60, 12, Math.toRadians(-190)))
                 .addTemporalMarker(() -> {
                     LLResult result = limelight.getLatestResult();
                     if (result != null && result.isValid()) {
                         telemetry.addData("Apriltags", tx);
                         tx = result.getTx();
                         ty = result.getTy();
-                        double val = Math.min(Math.max(0.8, turret.getPosition() + (tx / 360)), 1);
-                        turret.setPosition(val);
+                        double val = Math.min(Math.max(0.8, turret.getPosition() + (tx / 450)), 1);
+                        turret.setPosition(val+0.004);
                         telemetry.addData("servo target pos", val);
                         telemetry.update();
                     }
 
                 })
-                .waitSeconds(0.9)
+                .waitSeconds(2)
                 .addTemporalMarker(() -> {
+                    telemetry.addData("Kicker code","");
+                    telemetry.update();
                     kicker.setPosition(KICKER_UP);
 
                 })
-                .waitSeconds(0.8)
+                .waitSeconds(0.6)
                 .addTemporalMarker(() -> kicker.setPosition(KICKER_DOWN))
-                .waitSeconds(0.8)
-                .addTemporalMarker(() -> armservo.setPosition(ARM_SERVO_POSITION))
-                .addTemporalMarker(() -> intake.setPower(INTAKE_COLLECT))
-                .addTemporalMarker(() -> bootkicker.setPower(-0.4))
-                .waitSeconds(0.7)
+                .waitSeconds(1)
+                .addTemporalMarker(() -> armservo.setPosition(ARM_SERVO_POSITION+0.005))
+                .addTemporalMarker(() -> intake.setPower(-0.7))//changed value
+                .addTemporalMarker(() -> bootkicker.setPower(BOOTKICKER_COLLECT))
+                .waitSeconds(1.5)
                 .addTemporalMarker(() -> {
                     if (distanceSensor.getDistance(DistanceUnit.CM) < 7.5) {
                         kicker.setPosition(KICKER_UP);
                     }
                 })
-                .waitSeconds(0.7)
-//                .addTemporalMarker(() -> kicker.setPosition(KICKER_DOWN))
-//                .waitSeconds(0.7)
-//                .addTemporalMarker(() -> {
-//                    if (distanceSensor.getDistance(DistanceUnit.CM) < 7.5) {
-//                        kicker.setPosition(KICKER_UP);
-//                    }
-//                })
-                .forward(20)
+                .waitSeconds(1)
+                .addTemporalMarker(() -> kicker.setPosition(KICKER_DOWN))
+                .waitSeconds(0.8)
+                .addTemporalMarker(() -> {
+                    if (distanceSensor.getDistance(DistanceUnit.CM) < 7.5) {
+                        kicker.setPosition(KICKER_UP);
+                    }
+
+                })
+                .waitSeconds(0.6)
+                .forward(22)
                 .build();
 
 
-//        drive.setPoseEstimate(startPose);
-
         waitForStart();
-
         if (isStopRequested()) return;
 
         drive.setPoseEstimate(startPose);
 
-        kicker.setPosition(0.225);
-        //  bootkicker.setPower(-0.6);
-
+        kicker.setPosition(KICKER_DOWN);
+        turret.setPosition(TURRET_CENTER);
         runtime.reset();
+
         drive.followTrajectorySequence(traj21BlueFront);
 
         while (!isStopRequested() && opModeIsActive()) {
             drive.update();
             Pose2d poseEstimate = drive.getPoseEstimate();
-
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", Math.toDegrees(poseEstimate.getHeading()));

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import static java.lang.Math.sqrt;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
-
+@Disabled
 @TeleOp(name="DecodeTestFinal4", group="Robot")
 public class DecodeTestFinal4 extends LinearOpMode {
     private final double SERVO_CENTER = 0.5;

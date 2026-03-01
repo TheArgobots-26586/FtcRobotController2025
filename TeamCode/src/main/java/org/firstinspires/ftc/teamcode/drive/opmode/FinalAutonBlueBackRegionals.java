@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
-@Autonomous(name = "FinalAutonBlueBackRegionals", group = "Robot")
+@Autonomous(name = "FinalAutonBlueBackRegionals_Old", group = "Robot")
 public class FinalAutonBlueBackRegionals extends LinearOpMode {
 
     private DcMotor intake = null;
@@ -43,7 +43,7 @@ public class FinalAutonBlueBackRegionals extends LinearOpMode {
     public static final double TURRET_CENTER = 0.778;
     public static final double KICKER_DOWN = 0.73;//0.225
     public static final double KICKER_UP = 0.36;
-    public static final double ARM_SERVO_POSITION = 0.045;
+    public static final double ARM_SERVO_POSITION = 0.175;
     public static final double INTAKE_IDLE = -0.1;
     public static final double BOOTKICKER_IDLE = -0.1;
     public static final double INTAKE_COLLECT = -0.9;
@@ -100,6 +100,7 @@ public class FinalAutonBlueBackRegionals extends LinearOpMode {
         TrajectorySequence traj21BlueFront = drive.trajectorySequenceBuilder(startPose)
                 .addTemporalMarker(() -> {
                     shooter.setVelocity(2115);
+                    armservo.setPosition(ARM_SERVO_POSITION);
                 })
                 .addTemporalMarker(() -> {
                     LLResult result = limelight.getLatestResult();
@@ -111,7 +112,7 @@ public class FinalAutonBlueBackRegionals extends LinearOpMode {
                         telemetry.addData("Apriltags", tx);
                         telemetry.addData("servo current pos", turrpos);
                         double val = Math.min(Math.max(TURRET_LEFT_POS, turret.getPosition() + (tx / 450)), TURRET_RIGHT_POS);
-                        turret.setPosition(val -0.005);
+                        turret.setPosition(val);
                         telemetry.addData("servo target pos", val);
                         telemetry.update();
                     }
@@ -130,7 +131,7 @@ public class FinalAutonBlueBackRegionals extends LinearOpMode {
                 .waitSeconds(0.6)
                 .addTemporalMarker(() -> kicker.setPosition(KICKER_DOWN))
                 .waitSeconds(0.6)
-                .addTemporalMarker(() -> armservo.setPosition(ARM_SERVO_POSITION+0.005))
+                .addTemporalMarker(() -> armservo.setPosition(ARM_SERVO_POSITION))
                 .addTemporalMarker(() -> intake.setPower(INTAKE_COLLECT))
                 .addTemporalMarker(() -> bootkicker.setPower(BOOTKICKER_COLLECT))
                 .waitSeconds(1)
@@ -164,7 +165,7 @@ public class FinalAutonBlueBackRegionals extends LinearOpMode {
                         ty = result.getTy();
                         telemetry.addData("Apriltags", tx);
                         double val = Math.min(Math.max(TURRET_LEFT_POS, turret.getPosition() + (tx / 450)), TURRET_RIGHT_POS);
-                        turret.setPosition(val-0.005);
+                        turret.setPosition(val);
                         telemetry.addData("servo target pos", val);
                         telemetry.update();
                     }
@@ -180,8 +181,8 @@ public class FinalAutonBlueBackRegionals extends LinearOpMode {
                 .waitSeconds(0.6)
                 .addTemporalMarker(() -> kicker.setPosition(KICKER_DOWN))
                 .waitSeconds(1)
-                .addTemporalMarker(() -> armservo.setPosition(ARM_SERVO_POSITION+0.005))
-                .addTemporalMarker(() -> intake.setPower(-0.7))//changed value
+                .addTemporalMarker(() -> armservo.setPosition(ARM_SERVO_POSITION))
+                .addTemporalMarker(() -> intake.setPower(INTAKE_COLLECT))//changed value
                 .addTemporalMarker(() -> bootkicker.setPower(BOOTKICKER_COLLECT))
                 .waitSeconds(1.5)
                 .addTemporalMarker(() -> {

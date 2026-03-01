@@ -1,35 +1,45 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
+
 
 @TeleOp(name="PinpointFieldCentricPinpoint", group="Robot")
 public class SampleFieldCentricPinpoint extends LinearOpMode {
 
-    private DcMotor leftFront, leftBack, rightFront, rightBack;
+    private DcMotorEx leftFront, leftBack, rightFront, rightBack;
 
     // Pinpoint Driver
     private GoBildaPinpointDriver odo;
 
     boolean lastOptions = false;
+    private PinpointLocalizer pinpointLocalizer;
 
     @Override
     public void runOpMode() {
 
-        leftFront  = hardwareMap.get(DcMotor.class, "LeftFront");
-        leftBack   = hardwareMap.get(DcMotor.class, "LeftBack");
-        rightFront = hardwareMap.get(DcMotor.class, "RightFront");
-        rightBack  = hardwareMap.get(DcMotor.class, "RightBack");
+        Telemetry dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
+       // distanceSensor = hardwareMap.get(RevColorSensorV3.class, "sensor_color_distance");
+        leftFront  = hardwareMap.get(DcMotorEx.class, "LeftFront");
+        leftBack   = hardwareMap.get(DcMotorEx.class, "LeftBack");
+        rightFront = hardwareMap.get(DcMotorEx.class, "RightFront");
+        rightBack  = hardwareMap.get(DcMotorEx.class, "RightBack");
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
 
-        // Initialize Pinpoint
+        pinpointLocalizer = new PinpointLocalizer(hardwareMap);
         odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
 
         // Calibration Settings
@@ -38,36 +48,27 @@ public class SampleFieldCentricPinpoint extends LinearOpMode {
        // odo.setOffsets(-127.0, -76.2, DistanceUnit.MM);
         //these are the new values
         odo.setOffsets(-111.0, -127.2, DistanceUnit.MM);
-       // odo.setOffsets(-127.0, -76.2, DistanceUnit.MM); // Using your previous offsets
 
-        // Since you are "sticker-side up", no orientation change needed
-        // but we reset to ensure we start at 0
         odo.resetPosAndIMU();
 
         telemetry.addData("Status", "Initialized - Pinpoint IMU Active");
         telemetry.update();
-
+        pinpointLocalizer = new PinpointLocalizer(hardwareMap);
         waitForStart();
 
         while (opModeIsActive()) {
-            // IMPORTANT: Must call update() to get new Gyro/Encoder data
-            odo.update();
 
-            // Reset heading on "Options" button
+            pinpointLocalizer.update();
             boolean options = gamepad1.options;
             if (options && !lastOptions) {
-                odo.resetPosAndIMU();
+                pinpointLocalizer.resetHeading();
             }
             lastOptions = options;
 
-            // DRIVETRAIN MATH
             double y  = -gamepad1.left_stick_y / 1.5;
             double x  =  gamepad1.left_stick_x / 1.5;
             double rx =  gamepad1.right_stick_x / 1.5;
-
-            // Use Pinpoint instead of Rev IMU
-            double heading = odo.getPosition().getHeading(AngleUnit.RADIANS);
-
+            double heading = pinpointLocalizer.getHeading();
             double rotX = x * Math.cos(-heading) - y * Math.sin(-heading);
             double rotY = x * Math.sin(-heading) + y * Math.cos(-heading);
 
@@ -77,10 +78,16 @@ public class SampleFieldCentricPinpoint extends LinearOpMode {
             rightFront.setPower((rotY - rotX - rx) / denom);
             rightBack.setPower((rotY + rotX - rx) / denom);
 
+
             // TELEMETRY
+            dashboardTelemetry.addData("RightBack Power",rightBack.getCurrent(CurrentUnit.AMPS));
+            dashboardTelemetry.addData("RightFront Power",rightFront.getCurrent(CurrentUnit.AMPS));
+            dashboardTelemetry.addData("LeftFront Power",leftFront.getCurrent(CurrentUnit.AMPS));
+            dashboardTelemetry.addData("LeftBack Power",leftBack.getCurrent(CurrentUnit.AMPS));
+
             telemetry.addData("Heading (Deg)", Math.toDegrees(heading));
             telemetry.addData("Status", odo.getDeviceStatus());
-            telemetry.addData("X-Pod Raw (Frozen?)", odo.getEncoderX());
+
             telemetry.update();
         }
     }

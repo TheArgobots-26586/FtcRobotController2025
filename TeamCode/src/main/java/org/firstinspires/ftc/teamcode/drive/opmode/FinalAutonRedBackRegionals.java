@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
-@Autonomous(name = "FinalAutonRedBackRegionals", group = "Robot")
+@Autonomous(name = "FinalAutonRedBackRegionals_old", group = "Robot")
 public class FinalAutonRedBackRegionals extends LinearOpMode {
 
     private DcMotor intake = null;
@@ -38,9 +38,9 @@ public class FinalAutonRedBackRegionals extends LinearOpMode {
     public static final double TURRET_LEFT_POS= 0.68;
     public static final double TURRET_RIGHT_POS = 0.88;
     public static final double TURRET_CENTER = 0.778;
-    public static final double KICKER_DOWN = 0.9;//0.225
-    public static final double KICKER_UP = 0.53;
-    public static final double ARM_SERVO_POSITION = 0.24;
+    public static final double KICKER_DOWN = 0.73;//0.225
+    public static final double KICKER_UP = 0.36;
+    public static final double ARM_SERVO_POSITION = 0.175;
     public static final double INTAKE_IDLE = -0.1;
     public static final double BOOTKICKER_IDLE = -0.1;
     public static final double INTAKE_COLLECT = -0.9;
@@ -93,7 +93,7 @@ public class FinalAutonRedBackRegionals extends LinearOpMode {
 
         TrajectorySequence traj21BlueFront = drive.trajectorySequenceBuilder(startPose)
                 .addTemporalMarker(() -> {
-                    shooter.setVelocity(1415);
+                    shooter.setVelocity(2115);
                 })
                 .addTemporalMarker(() -> {
                     LLResult result = limelight.getLatestResult();
@@ -101,7 +101,7 @@ public class FinalAutonRedBackRegionals extends LinearOpMode {
                         telemetry.addData("Apriltags", tx);
                         tx = result.getTx();
                         ty = result.getTy();
-                        double val = Math.min(Math.max(TURRET_LEFT_POS, turret.getPosition() + (tx / 360)), TURRET_RIGHT_POS);
+                        double val = Math.min(Math.max(TURRET_LEFT_POS, turret.getPosition() + (tx / 450)), TURRET_RIGHT_POS);
                         turret.setPosition(val +0.004);
                         telemetry.addData("servo target pos", val);
                         telemetry.update();
@@ -151,7 +151,7 @@ public class FinalAutonRedBackRegionals extends LinearOpMode {
                         telemetry.addData("Apriltags", tx);
                         tx = result.getTx();
                         ty = result.getTy();
-                        double val = Math.min(Math.max(0.8, turret.getPosition() + (tx / 360)), 1);
+                        double val = Math.min(Math.max(0.8, turret.getPosition() + (tx / 450)), 1);
                         turret.setPosition(val+0.004);
                         telemetry.addData("servo target pos", val);
                         telemetry.update();

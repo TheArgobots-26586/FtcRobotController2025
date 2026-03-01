@@ -19,7 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drive.PinpointLocalizer;
 
 
-@TeleOp(name="DECODE_FINAL_TELEOP3ABLUE", group="Robot")
+@TeleOp(name="DECODE_FINAL_TELEOP3ABLUE_REGIONALS", group="Robot")
 public class DECODE_FINAL_TELEOP3ABLUE extends LinearOpMode {
 
 /*================CONTROLS================
@@ -43,11 +43,11 @@ public class DECODE_FINAL_TELEOP3ABLUE extends LinearOpMode {
     double distanceInches = 0;
 
     //================CONSTANTS================//
-    public static final double TURRET_RIGHT = 0.88;
-    public static final double TURRET_LEFT = 0.68;
+    public static final double TURRET_RIGHT = 0.93;//0.88
+    public static final double TURRET_LEFT = 0.63;//0.68
     public static final double TURRET_CENTER = 0.778;
-    public static final double KICKER_DOWN = 0.73;//0.225
-    public static final double KICKER_UP = 0.36;//0.6
+    public static final double KICKER_DOWN = 0.71;//0.225
+    public static final double KICKER_UP = 0.374;//0.6
     public static final double KICKER_MIDDLE = 0.53;
     public static final double ARM_SERVO_POSITION = 0.175;//0.043 //0.045
     public static final double INTAKE_IDLE = -0.1;
@@ -80,8 +80,8 @@ public class DECODE_FINAL_TELEOP3ABLUE extends LinearOpMode {
     Range range2 = new Range(55, 73, 1860);//1200
     //Range range3 = new Range(73,85,)
 
-    Range range3 = new Range(112, Integer.MAX_VALUE, 2140);//1430
-    Range range4 = new Range(73, 112, 2115);//1410
+    Range range3 = new Range(112, Integer.MAX_VALUE, 2200);//1430
+    Range range4 = new Range(73, 112, 2170);//1410
 
 
     //STATE MACHINE SETUP
@@ -180,8 +180,8 @@ public class DECODE_FINAL_TELEOP3ABLUE extends LinearOpMode {
             double distanceCM = distanceSensor.getDistance(DistanceUnit.CM);
 
             // DRIVETRAIN
-            double y  = -gamepad1.left_stick_y;
-            double x  =  gamepad1.left_stick_x;
+            double y  = -gamepad1.left_stick_y*0.825;
+            double x  =  gamepad1.left_stick_x/0.825;
             double rx =  gamepad1.right_stick_x;
             double heading = pinpointLocalizer.getHeading();
             double rotX = x * Math.cos(-heading) - y * Math.sin(-heading);
@@ -224,7 +224,8 @@ public class DECODE_FINAL_TELEOP3ABLUE extends LinearOpMode {
                 tx = result.getTx();
                 double val = 0;
                 if (detectedID == 20) {
-                    val = Math.min(Math.max(TURRET_LEFT, turrpos + (tx / 360)-0.005), TURRET_RIGHT);
+                   // val = Math.min(Math.max(TURRET_LEFT, turrpos + (tx / 450)-0.005), TURRET_RIGHT);
+                    val = Math.min(Math.max(TURRET_LEFT, turrpos + (tx / 450)-0.002), TURRET_RIGHT);
                     turret.setPosition(val);
                     telemetry.addData("servo target pos blue", val );
                 }
@@ -309,8 +310,8 @@ public class DECODE_FINAL_TELEOP3ABLUE extends LinearOpMode {
                         bootkicker.setPower(0);
                     }
                     else {
-                        intake.setPower(INTAKE_COLLECT);
-                        bootkicker.setPower(BOOTKICKER_COLLECT);
+                        intake.setPower(INTAKE_COLLECT-0.35);
+                        bootkicker.setPower(BOOTKICKER_COLLECT-0.05);
                     }
                     shooter.setVelocity(shooterVelocity(distanceInches));
                     if ((distanceCM < 7 && kickerStage == 0) || kickerPartial) {
@@ -325,7 +326,7 @@ public class DECODE_FINAL_TELEOP3ABLUE extends LinearOpMode {
                         kickerStage = 2;
                     }
 // delay 400ms
-                    if (kickerStage == 2 && runtime.milliseconds() >= 400) {//500
+                    if (kickerStage == 2 && runtime.milliseconds() >= 500) {//500
                         kicker.setPosition(KICKER_DOWN);
                         runtime.reset();
                         kickerStage = 3;

@@ -6,7 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "DistanceCheck", group = "TeleOp")
-public class DistanceCheck extends LinearOpMode {
+public class
+DistanceCheck extends LinearOpMode {
 
     // ================== CAMERA / TAG SETUP ==================
     private static final double CAMERA_HEIGHT_INCHES = 12.9;   // camera lens height

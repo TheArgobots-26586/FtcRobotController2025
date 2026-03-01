@@ -2,11 +2,13 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -18,6 +20,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class kicker extends LinearOpMode {
 
     private Servo kicker;
+    private RevColorSensorV3 distanceSensor;
 
 
 
@@ -25,7 +28,7 @@ public class kicker extends LinearOpMode {
     public void runOpMode() {
 
         kicker = hardwareMap.get(Servo.class, "kicker");
-
+        distanceSensor = hardwareMap.get(RevColorSensorV3.class, "sensor_color_distance");
 
         // --- Initialize intake/shooter ---
 
@@ -38,7 +41,7 @@ public class kicker extends LinearOpMode {
         // --- Initialize IMU ---
 
 
-
+        distanceSensor.setGain(8);
         waitForStart();
         //distance sensor
 
@@ -47,31 +50,31 @@ public class kicker extends LinearOpMode {
 
 
             if (gamepad1.x) {
-                kicker.setPosition(0.8);//higher position
+                kicker.setPosition(0.36);//higher position
             }
 
             if (gamepad1.dpad_down) {
-                kicker.setPosition(0.85);
-            }
-            if (gamepad1.dpad_right) {
-                kicker.setPosition(0.9);
-            }
-            if (gamepad1.dpad_left) {
-                kicker.setPosition(1);
-            }
-            if (gamepad1.dpad_up) {
                 kicker.setPosition(0.75);
             }
-            if (gamepad1.a) {
-                kicker.setPosition(0.4);
+            if (gamepad1.dpad_right) {
+                kicker.setPosition(0.37);
             }
-         //   if (gamepad1.dpad_left) {
-           //     kicker.setPosition(0.9);
-           // }
+            if (gamepad1.dpad_left) {
+                kicker.setPosition(0.375);
+            }
+            if (gamepad1.dpad_up) {
+                kicker.setPosition(0.38);
+            }
+            if (gamepad1.a) {
+                kicker.setPosition(0.385);
+            }
+            //   if (gamepad1.dpad_left) {
+            //     kicker.setPosition(0.9);
+            // }
 
 
-            telemetry.addData("armservo Pos", kicker.getPosition());
-           // telemetry.addData("armservo Pos", armservo.get());
+            telemetry.addData("kicker Pos", kicker.getPosition());
+            telemetry.addData("Distance Sensor Value: ", distanceSensor.getDistance(DistanceUnit.CM));
 
 
             telemetry.update();
@@ -79,6 +82,3 @@ public class kicker extends LinearOpMode {
 
     }
 }
-
-
-
